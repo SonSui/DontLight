@@ -20,8 +20,6 @@ public class PlayerAction : NetworkBehaviour
 
     private bool isGampadConnected = false;
 
-    private Camera localCamera;
-
     [Header("Walk Settings")]
     [SerializeField] private float rotateSpeed = 2f;
     [SerializeField] private float walkSpeed = 5f;
@@ -139,30 +137,6 @@ public class PlayerAction : NetworkBehaviour
                 Quaternion targetRotation = Quaternion.LookRotation(playerDirection, Vector3.up);
                 transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, rotateSpeed * Time.deltaTime);
             }
-        }
-    }
-
-    // ﾐﾂﾔｽｷｨ
-    public void OnCameraCreated(Camera cam)
-    {
-        localCamera = cam;
-        Debug.Log("Player camera assigned");
-    }
-
-    private void RotateWithMouseFollow()
-    {
-        if (!IsOwner || localCamera == null)
-        {
-            Debug.LogWarning("No local camera available");
-            return;
-        }
-
-        Ray ray = localCamera.ScreenPointToRay(Mouse.current.position.ReadValue());
-        Plane groundPlane = new Plane(Vector3.up, Vector3.zero);
-
-        if (groundPlane.Raycast(ray, out float rayDistance))
-        {
-            LookAt(ray.GetPoint(rayDistance));
         }
     }
 
