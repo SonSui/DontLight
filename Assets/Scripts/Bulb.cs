@@ -4,6 +4,7 @@ public class Bulb : MonoBehaviour
 {
     public float radius = 2f;
     public int damagePerSecond = 1;
+    public bool isDebug = false; // Enable debug logs
 
     private float sqrRadius;
     private float minDmgDistance = 0.01f; // Minimum distance to avoid division by zero
@@ -35,14 +36,15 @@ public class Bulb : MonoBehaviour
                 Ray ray = new Ray(transform.position, dir);
                 RaycastHit hit;
 
-                Debug.DrawRay(transform.position, dir * distance, Color.red, 0.1f);
+                if (isDebug) Debug.DrawRay(transform.position, dir * distance, Color.red, 0.1f);
 
                 if (Physics.Raycast(ray, out hit, distance, obstacleMask))
                 {
+                    if (isDebug) Debug.DrawRay(transform.position, dir * hit.distance, Color.green, 0.1f);
                     Debug.Log($"[BULB] Raycast from bulb {gameObject.name} to player {player.name} hit obstacle: {hit.collider.name} at distance {hit.distance}.");
                 }
                 else
-                {
+                { 
                     Debug.Log($"[BULB] Raycast from bulb {gameObject.name} to player {player.name} hit nothing. Player exposed to light!");
                     GameEvents.PlayerEvents.OnTakeLightDamage?.Invoke(player, damage);
                 }
