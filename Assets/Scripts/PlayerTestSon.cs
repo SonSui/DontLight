@@ -7,7 +7,7 @@ public class PlayerTestSon : MonoBehaviour
     {
         
         GameEvents.PlayerEvents.OnPlayerSpawned?.Invoke(this.gameObject);
-        Invoke("Die", 50f); // Simulate player death after 30 seconds
+        //Invoke("Die", 50f); // Simulate player death after 30 seconds
     }
 
     public void Die()
