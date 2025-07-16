@@ -9,14 +9,14 @@ public class SpotLightManager : MonoBehaviour
 
     private void OnEnable()
     {
-        GameEvents.SpotLight.OnSpotLightCreated += AddLight;
-        GameEvents.SpotLight.OnSpotLightDestroyed += RemoveLight;
+        GameEvents.Light.OnPointLightCreated += AddLight;
+        GameEvents.Light.OnPointLightDestroyed += RemoveLight;
     }
 
     private void OnDisable()
     {
-        GameEvents.SpotLight.OnSpotLightCreated -= AddLight;
-        GameEvents.SpotLight.OnSpotLightDestroyed -= RemoveLight;
+        GameEvents.Light.OnPointLightCreated -= AddLight;
+        GameEvents.Light.OnPointLightDestroyed -= RemoveLight;
     }
 
     private void AddLight(Bulb light)
