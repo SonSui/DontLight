@@ -1,16 +1,14 @@
-using UnityEngine;
 using System.Collections.Generic;
+using UnityEngine;
 
 public class MapGenerator : MonoBehaviour
 {
     public List<GameObject> MapPrefabs;
-    
+
     private int[,] mapData;
 
-    private float PrefabsXpos = 25f;
-    private float PrefabsYpos = 0.5f;//地面との距離
-    private float PrefabsZpos = -10f;
-
+    // マップのスタート位置（左上の基準点など）
+    public Vector3 mapOrigin = new Vector3(-25f, 0.5f, 0f);
     public GameObject mapParent; //生成物の親オブジェクト これがないとヒエラルキーが見づらい
     private void Start()
     {
@@ -20,7 +18,7 @@ public class MapGenerator : MonoBehaviour
 
     void LoadMapDataFromText(string fileName)
     {
-        TextAsset textAsset = Resources.Load<TextAsset>(fileName); //Resourcesフォルダ内から読み込む
+        TextAsset textAsset = Resources.Load<TextAsset>(fileName);
 
         if (textAsset == null)
         {
@@ -53,8 +51,14 @@ public class MapGenerator : MonoBehaviour
             {
                 if (mapData[z, x] != 0)
                 {
-                    GameObject obj = Instantiate(MapPrefabs[mapData[z, x] - 1], new Vector3(PrefabsXpos - x, PrefabsYpos, PrefabsZpos + z), Quaternion.identity);//生成
-                    obj.transform.parent = mapParent.transform;//親指定
+                    GameObject prefab = MapPrefabs[mapData[z, x] - 1];
+                    Vector3 pos = new Vector3(
+                        mapOrigin.x - x,
+                        mapOrigin.y,
+                        mapOrigin.z + z
+                    );
+                    GameObject obj = Instantiate(prefab, pos, prefab.transform.rotation);
+                    obj.transform.parent = mapParent.transform;
                 }
             }
         }
