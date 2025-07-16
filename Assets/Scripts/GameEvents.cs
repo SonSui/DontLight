@@ -12,10 +12,10 @@ public class GameEvents
         public static Func<List<GameObject>> OnQueryAllPlayers;//全てのプレイヤーを取得するためのイベント
         public static Action<GameObject, float> OnTakeLightDamage;//プレイヤーがライトからダメージを受けたときに呼ばれるイベント
     }
-    public static class SpotLight
+    public static class Light
     {
-        public static Action<Bulb> OnSpotLightCreated;//電球が作成されたときに呼ばれるイベント
-        public static Action<Bulb> OnSpotLightDestroyed;//電球が破壊されたときに呼ばれるイベント
+        public static Action<Bulb> OnPointLightCreated;//電球が作成されたときに呼ばれるイベント
+        public static Action<Bulb> OnPointLightDestroyed;//電球が破壊されたときに呼ばれるイベント
     }
 
 }
