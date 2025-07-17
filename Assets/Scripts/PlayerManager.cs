@@ -41,12 +41,12 @@ public class PlayerManager : MonoBehaviour
     {
         return allPlayers;
     }
-    public void TakeDamage(GameObject player, float damage)
+    public void TakeDamage(GameObject player, DamageInfo damageInfo)
     {
         if (allPlayers.Contains(player))
         {
             
-            Debug.Log($"Player {player.name} took {damage} damage.");
+            Debug.Log($"Player {player.name} took {damageInfo.damage} damage.");
         }
         else
         {
