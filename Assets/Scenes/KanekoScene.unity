@@ -1875,9 +1875,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   MapPrefabs:
-  - {fileID: 9070396320044885608, guid: c69daa5f72dbe2a4c95490c153f5495a, type: 3}
-  - {fileID: 1987964543598985638, guid: b55aa1b82b5fb2140b82556015f4afea, type: 3}
-  - {fileID: 1263815708417979845, guid: eddead3eb0cdd0c44a6727f246e6cbd3, type: 3}
+  - {fileID: 9070396320044885608, guid: 91f61aedd5e376940a67c4249b4d3f1b, type: 3}
+  - {fileID: 1987964543598985638, guid: f31dcd3f1ea5c3f4994e37d8786e2d8f, type: 3}
+  - {fileID: 1263815708417979845, guid: 189f54de6fe2c964bb83888011ece8e9, type: 3}
   - {fileID: 6919438700757646468, guid: 194df2a43d0e59a419526044f672eaa5, type: 3}
   - {fileID: 5128504383458667611, guid: 098fa57cde74f614682057941c7b4612, type: 3}
   - {fileID: 4419179866676560492, guid: 98e959abf5cc5b44e890c7be0d3998c1, type: 3}
