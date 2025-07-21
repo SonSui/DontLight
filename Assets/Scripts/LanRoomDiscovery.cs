@@ -11,18 +11,31 @@ public class LanRoomDiscovery : MonoBehaviour
     private Dictionary<string, string> roomMap = new Dictionary<string, string>();
     private Dictionary<string, float> roomLastSeen = new Dictionary<string, float>();
     private float roomTimeout = 10f;
+    private bool isListening = true;
 
     void Start()
     {
-        udpReceiver = new UdpClient(8888);
-        udpReceiver.EnableBroadcast = true;
-        udpReceiver.BeginReceive(OnReceive, null);
+        try
+        {
+            udpReceiver = new UdpClient(8888);
+            udpReceiver.EnableBroadcast = true;
+            udpReceiver.BeginReceive(OnReceive, null);
 
-        Debug.Log("🎧 大厅开始监听房间广播...");
+            isListening = true;
+
+            Debug.Log("🎧 大厅开始监听房间广播...");
+        }
+        catch (Exception ex)
+        {
+            Debug.LogError("❌ 启动监听失败: " + ex.Message);
+        }
     }
 
     void OnReceive(IAsyncResult result)
     {
+        if (!isListening || udpReceiver == null)
+            return;
+
         try
         {
             IPEndPoint remoteEP = new IPEndPoint(IPAddress.Any, 0);
@@ -35,7 +48,12 @@ public class LanRoomDiscovery : MonoBehaviour
             roomMap[ip] = message;
             roomLastSeen[ip] = Time.time;
 
-            // TODO: 在这里更新 UI（比如刷新房间列表）
+            // TODO: 刷新 UI
+        }
+        catch (ObjectDisposedException)
+        {
+            Debug.LogWarning("⚠ UdpClient 已关闭，停止接收。");
+            return;
         }
         catch (Exception ex)
         {
@@ -43,8 +61,18 @@ public class LanRoomDiscovery : MonoBehaviour
         }
         finally
         {
-            // ✅ 确保持续监听
-            udpReceiver.BeginReceive(OnReceive, null);
+            // 继续监听（只有在 still active 时）
+            if (isListening && udpReceiver != null)
+            {
+                try
+                {
+                    udpReceiver.BeginReceive(OnReceive, null);
+                }
+                catch (Exception e)
+                {
+                    Debug.LogWarning("BeginReceive 失败：" + e.Message);
+                }
+            }
         }
     }
 
@@ -71,10 +99,17 @@ public class LanRoomDiscovery : MonoBehaviour
 
     void OnDestroy()
     {
-        udpReceiver?.Close();
+        isListening = false;
+
+        if (udpReceiver != null)
+        {
+            udpReceiver.Close();
+            udpReceiver = null;
+            Debug.Log("🛑 停止监听房间广播。");
+        }
     }
 
-    // 可选：暴露给 UI 的方法，获取当前所有房间广播信息
+    // 提供当前房间信息
     public List<string> GetRoomList()
     {
         return new List<string>(roomMap.Values);
