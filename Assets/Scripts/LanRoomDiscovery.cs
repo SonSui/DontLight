@@ -10,6 +10,7 @@ using System.Collections;
 public class LanRoomDiscovery : MonoBehaviour
 {
     public GameObject listPanelPrefab;
+    public GameObject NoPeople;
     public Transform contentParent;
     private UdpClient udpReceiver;
     private long nowTimer;
@@ -175,6 +176,8 @@ public class LanRoomDiscovery : MonoBehaviour
             }
             eleNum++;
         }
+        if (roomDetail.Count == 0) NoPeople.SetActive(true);
+        else NoPeople.SetActive(false);
     }
 
     long GetCurrentUnixTimestampMilliseconds()
