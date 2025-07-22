@@ -6,10 +6,7 @@ public class PlayerUI : MonoBehaviour
     public BulbUI bulbUI; // プレイヤーのBulb UI
     public BatteryUI batteryUI; // プレイヤーのBattery UI
 
-    private void Update()
-    {
-        TestUpdateHP();
-    }
+    
     public void TestUpdateHP()
     {
         // テスト用のHP更新
