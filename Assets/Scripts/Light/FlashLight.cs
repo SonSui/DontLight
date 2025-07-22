@@ -1,4 +1,5 @@
 using UnityEngine;
+using DG.Tweening;
 
 public class Flashlight : MonoBehaviour
 {
@@ -9,9 +10,13 @@ public class Flashlight : MonoBehaviour
     public GameObject owner;                   // 懐中電灯の所有者（プレイヤー）
     public bool isDebug = false;               // デバッグ用のフラグ
     public Light flashlightLight;              // 懐中電灯のLightコンポーネント
+    public float intensity = 10f;            // 懐中電灯の光の強さ（初期値）
 
     private float range;                       // 実際の判定用レンジ
     private float spotAngle;                   // 実際の判定用スポット角度
+
+    private Tween shutdownTween;       
+    private bool isShuttingDown = false;
     private void Start()
     {
         GameEvents.Light.OnFlashlightCreated?.Invoke(this); // 懐中電灯が作成されたことを通知
@@ -24,6 +29,7 @@ public class Flashlight : MonoBehaviour
             // Light の range と spotAngle を自動で取得し、0.9 を掛ける
             range = flashlightLight.range * rangeOffset;
             spotAngle = flashlightLight.spotAngle * rangeOffset;
+            intensity = flashlightLight.intensity; // 初期の光の強さを取得
 
             if (isDebug) Debug.Log($"[FLASHLIGHT] {name} loaded settings from Light component. range={range}, spotAngle={spotAngle}");
             
@@ -47,7 +53,7 @@ public class Flashlight : MonoBehaviour
     /// <param name="player">判定するプレイヤー</param>
     public void CheckPlayer(GameObject player,LayerMask obstacleMask)
     {
-        if (!isEnabled) return; // 懐中電灯が無効なら何もしない
+        if (!isEnabled || isShuttingDown) return; // 消灯中なら無視 // 懐中電灯が無効なら何もしない
         if (player == null || player == owner) return; // 所有者自身は無視
 
         Vector3 lightPos = transform.position;                       // 懐中電灯の位置
@@ -103,14 +109,77 @@ public class Flashlight : MonoBehaviour
             }
         }
     }
-    
-    public void ToggleFlashlight()
+
+    public void ToggleFlashlight(bool toggle)
     {
-        isEnabled = !isEnabled; // 懐中電灯の有効/無効を切り替え
-        if (flashlightLight != null)
+        // 通常のON/OFF切替、強制消灯中なら中止
+        if (isShuttingDown&&toggle)
         {
-            flashlightLight.enabled = isEnabled;
+            CancelShutdown();
         }
-        if(isDebug) Debug.Log($"[FLASHLIGHT] {name} flashlight is now {(isEnabled ? "enabled" : "disabled")}.");
+        else
+        {
+            isEnabled = toggle;
+            if (flashlightLight != null)
+            {
+                flashlightLight.enabled = isEnabled;
+            }
+            if (isDebug) Debug.Log($"[FLASHLIGHT] {name} flashlight is now {(isEnabled ? "enabled" : "disabled")}.");
+        }
+    }
+    /// <summary>
+    /// 強制的に懐中電灯を1.5秒かけて消灯（バッテリー切れ時など）
+    /// </summary>
+    public void ForceShutdown()
+    {
+        if (isShuttingDown || flashlightLight == null) return;
+
+        isShuttingDown = true;
+        isEnabled = false;
+
+        float originalIntensity = flashlightLight.intensity;
+
+        // 既存のTweenがあれば止める
+        shutdownTween?.Kill();
+
+        Sequence seq = DOTween.Sequence();
+
+        // 点滅2回（1秒）
+        seq.Append(flashlightLight.DOIntensity(0, 0.25f));
+        seq.Append(flashlightLight.DOIntensity(originalIntensity, 0.25f));
+        seq.Append(flashlightLight.DOIntensity(0, 0.25f));
+        seq.Append(flashlightLight.DOIntensity(originalIntensity, 0.25f));
+
+        // 0.5秒で消灯
+        seq.Append(flashlightLight.DOIntensity(0, 0.5f));
+
+        // 完了時にライトを無効化
+        seq.OnComplete(() =>
+        {
+            flashlightLight.enabled = false;
+            shutdownTween = null;
+            isShuttingDown = false;
+            if (isDebug) Debug.Log($"[FLASHLIGHT] {name} forced shutdown complete.");
+        });
+
+        shutdownTween = seq;
+
+        if (isDebug) Debug.Log($"[FLASHLIGHT] {name} forced shutdown started.");
+    }
+
+    /// <summary>
+    /// 強制消灯中にON指令が来たとき、Tweenをキャンセルして再点灯
+    /// </summary>
+    public void CancelShutdown()
+    {
+        if (!isShuttingDown || flashlightLight == null) return;
+
+        shutdownTween?.Kill();
+        flashlightLight.intensity = intensity; // 明るさを最大に戻す（必要に応じて修正）
+        flashlightLight.enabled = true;
+        isEnabled = true;
+        isShuttingDown = false;
+
+        if (isDebug) Debug.Log($"[FLASHLIGHT] {name} shutdown canceled and flashlight re-enabled.");
     }
 }

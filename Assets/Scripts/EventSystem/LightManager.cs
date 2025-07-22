@@ -8,6 +8,8 @@ public class LightManager : MonoBehaviour
     private List<Bulb> bulbs = new List<Bulb>();
     private List<Flashlight> flashlights = new List<Flashlight>();
 
+    public int bulbMaxCount = 16; // 最大電球数
+
     private void OnEnable()
     {
         GameEvents.Light.OnPointLightCreated += AddLight;
@@ -31,6 +33,17 @@ public class LightManager : MonoBehaviour
             bulbs.Add(light);
             // 電球が作成されたことを通知
             Debug.Log("Spotlight created: " + light.name);
+            // 電球の数が最大数を超えた場合、最も古い電球を削除
+            if (bulbs.Count > bulbMaxCount)
+            {
+                int count = bulbs.Count - bulbMaxCount;
+                for (int i = 0; i < count; i++)
+                {
+                    if(bulbs.Count <= i) break; // 安全チェック
+                    bulbs[i].Extinguish(); // 電球を消灯
+                    Debug.Log("Removed oldest spotlight: " + bulbs[i].name);
+                }
+            }
         }
     }
 
@@ -63,20 +76,24 @@ public class LightManager : MonoBehaviour
         var players = GameEvents.PlayerEvents.OnQueryAllPlayers?.Invoke();
         if (players == null) return;
 
+        // Dictionary を List に変換して列挙を安全にする
+        var playerList = new List<KeyValuePair<GameObject, PlayerData>>(players);
+
         foreach (var light in bulbs)
         {
-            foreach (var player in players)
+            foreach (var player in playerList)
             {
-                light.CheckPlayer(player, obstacleMask);
-                //Debug.Log($"Checking player {player.name} with light {light.name}.");
+                if (player.Key == null) continue;
+                light.CheckPlayer(player.Key, obstacleMask);
             }
         }
+
         foreach (var flashlight in flashlights)
         {
-            foreach (var player in players)
+            foreach (var player in playerList)
             {
-                flashlight.CheckPlayer(player,obstacleMask);
-                //Debug.Log($"Checking player {player.name} with flashlight {flashlight.name}.");
+                if (player.Key == null) continue;
+                flashlight.CheckPlayer(player.Key, obstacleMask);
             }
         }
     }

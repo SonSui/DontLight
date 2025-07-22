@@ -134,14 +134,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 02d407feecd36b246b0c49064ca8e31f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  range: 10
-  spotAngle: 25
   damagePerSecond: 1
-  obstacleMask:
-    serializedVersion: 2
-    m_Bits: 0
+  rangeOffset: 0.9
   isEnabled: 1
   owner: {fileID: 0}
+  isDebug: 0
+  flashlightLight: {fileID: 5427464293179597721}
 --- !u!1001 &8387505286727309408
 PrefabInstance:
   m_ObjectHideFlags: 0
