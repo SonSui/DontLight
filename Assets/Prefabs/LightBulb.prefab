@@ -82,7 +82,7 @@ BoxCollider:
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 3
-  m_Size: {x: 0.5, y: 1, z: 0.5}
+  m_Size: {x: 0.3, y: 0.8, z: 0.3}
   m_Center: {x: 0, y: 0, z: 0}
 --- !u!114 &3820994540792976073
 MonoBehaviour:
@@ -96,9 +96,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: bbd9c8fcc745c494f9a367ded388e822, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  radius: 2
+  rangeOffset: 0.9
   damagePerSecond: 1
   isDebug: 1
+  bulbLight: {fileID: 7957784329532768979}
 --- !u!1 &7646237109486531693
 GameObject:
   m_ObjectHideFlags: 0
@@ -234,15 +235,15 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 651062782762691917, guid: d4c3cf71f0bd2174888daffe114c41e2, type: 3}
       propertyPath: m_LocalScale.x
-      value: 10
+      value: 5
       objectReference: {fileID: 0}
     - target: {fileID: 651062782762691917, guid: d4c3cf71f0bd2174888daffe114c41e2, type: 3}
       propertyPath: m_LocalScale.y
-      value: 10
+      value: 5
       objectReference: {fileID: 0}
     - target: {fileID: 651062782762691917, guid: d4c3cf71f0bd2174888daffe114c41e2, type: 3}
       propertyPath: m_LocalScale.z
-      value: 10
+      value: 5
       objectReference: {fileID: 0}
     - target: {fileID: 651062782762691917, guid: d4c3cf71f0bd2174888daffe114c41e2, type: 3}
       propertyPath: m_LocalPosition.x

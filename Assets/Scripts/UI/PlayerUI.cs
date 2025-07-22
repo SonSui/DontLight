@@ -1,42 +1,79 @@
+using TMPro;
 using UnityEngine;
 
 public class PlayerUI : MonoBehaviour
 {
-    public HPUI hpUI; // プレイヤーのHP UI
-    public BulbUI bulbUI; // プレイヤーのBulb UI
-    public BatteryUI batteryUI; // プレイヤーのBattery UI
+    [Header("UI要素")]
+    public HPUI hpUI;
+    public BulbUI bulbUI;
+    public BatteryUI batteryUI;
+    public TextMeshProUGUI playerNameText;
 
-    
-    public void TestUpdateHP()
+    private int playerIndex = -1;
+
+    private void OnEnable()
     {
-        // テスト用のHP更新
-        HPInfo hpInfo = new HPInfo(100f, 100f, false, 100f);
-        hpUI.UpdateHPBar(hpInfo);
-        HPInfo hpInfo2 = new HPInfo(0f, 80f);
-        hpUI.UpdateHPBar(hpInfo2);
+        GameEvents.PlayerEvents.OnHPChanged += OnHPChanged;
+        GameEvents.PlayerEvents.OnBulbStateChanged += OnBulbChanged;
+        GameEvents.PlayerEvents.OnBatteryChanged += OnBatteryChanged;
     }
-    public void TestUpdateHP2()
+
+    private void OnDisable()
     {
-        // テスト用のHP更新（ダメージ）
-        HPInfo hpInfo = new HPInfo(100f, 100f, false, 100f);
-        hpUI.UpdateHPBar(hpInfo);
+        GameEvents.PlayerEvents.OnHPChanged -= OnHPChanged;
+        GameEvents.PlayerEvents.OnBulbStateChanged -= OnBulbChanged;
+        GameEvents.PlayerEvents.OnBatteryChanged -= OnBatteryChanged;
     }
-    public void TestUpdateBulb()
+
+    /// <summary>
+    /// プレイヤーデータを元にUI初期化を行う
+    /// </summary>
+    public void Initialize(PlayerData data)
     {
-        // テスト用のBulb更新
-        bulbUI.SetBulbState(true);
-        bulbUI.SetBulbState(false);
+        this.playerIndex = data.playerIndex;
+
+        if (playerNameText != null)
+            playerNameText.text = data.playerName;
+
+        // HP装飾色を設定
+        hpUI?.SetUIColor(data.playerColor);
+
+        // 電球クールダウン初期値を設定
+        if (bulbUI != null)
+        {
+            bulbUI.SetCooldown(data.bulbCooldown); // ※この関数はbulbUI側に実装が必要
+        }
     }
-    public void TestUpdateBattery()
+
+    private void OnHPChanged(int index, HPInfo info)
     {
-        // テスト用のBattery更新
-        batteryUI.UpdateBattery(100f,false,100f);
-        batteryUI.UpdateBattery(5f,false);
+        if (index != playerIndex) return;
+        hpUI?.UpdateHP(info); // HPUI内部でアニメ処理を維持
     }
-    public void TestUpdateBattery2()
+
+    private void OnBulbChanged(int index, int state)
     {
-        // テスト用のBattery更新（充電）
-        batteryUI.UpdateBattery(50f, true);
+        if (index != playerIndex) return;
+
+        switch (state)
+        {
+            case 0:
+                bulbUI?.SetBulbState(false); // 無灯泡
+                break;
+            case 1:
+                bulbUI?.SetBulbState(true);  // 持っている
+                break;
+            case 2:
+                bulbUI?.SetBulbState(false);
+                bulbUI?.StartCooldown();     // CD中（内部CD時間に従う）
+                break;
+        }
     }
-    
+
+    private void OnBatteryChanged(int index, float num,bool isCharge)
+    {
+        if (index != playerIndex) return;
+        batteryUI?.UpdateBattery(num,isCharge); // BatteryUI内部でアニメ処理を維持
+    }
+
 }

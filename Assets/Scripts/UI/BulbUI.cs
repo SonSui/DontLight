@@ -85,8 +85,21 @@ public class BulbUI : MonoBehaviour
 
         }
     }
-    public void SetResetTime(float delay)
+    public void SetCooldown(float cd)
     {
-        resetTime = delay;
+        resetTime = cd;
+    }
+
+    public void StartCooldown()
+    {
+        if (gameObject.activeInHierarchy)
+        {
+            if (chargeTween != null && chargeTween.IsActive())
+                chargeTween.Kill();
+
+            chargeTween = ring.DOFillAmount(0f, resetTime)
+                .SetEase(Ease.Linear)
+                .OnComplete(() => SetBulbState(true));
+        }
     }
 }

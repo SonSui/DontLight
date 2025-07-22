@@ -1,4 +1,5 @@
 using UnityEngine;
+using DG.Tweening;
 
 public class Bulb : MonoBehaviour
 {
@@ -10,9 +11,10 @@ public class Bulb : MonoBehaviour
 
     private float sqrRadius;
     private float minDmgDistance = 0.01f; // 最小ダメージ距離
+    private bool isExtinguished = false; // 電球が消灯中かどうか
+    private float spawnTime = 0.5f; // 電球のスポーン時間
     private void Start()
     {
-        bulbLight = GetComponent<Light>();
         if (bulbLight != null)
         {
             radius = bulbLight.range * rangeOffset; // Lightのrangeを0.9倍して使用
@@ -25,7 +27,21 @@ public class Bulb : MonoBehaviour
             if (isDebug) Debug.LogWarning($"[BULB] {name} Light component not found. Using default radius.");
         }
         sqrRadius = radius * radius;
+        bulbLight.enabled = false; // 初期状態では光を消しておく
         GameEvents.Light.OnPointLightCreated?.Invoke(this);
+    }
+    private void Update()
+    {
+        // スポーン時間が経過したら、電球の光を有効にする
+        if (spawnTime > 0)
+        {
+            spawnTime -= Time.deltaTime;
+            if (spawnTime <= 0 && bulbLight != null)
+            {
+                bulbLight.enabled = true;
+                if (isDebug) Debug.Log($"[BULB] {name} light enabled after spawn time.");
+            }
+        }
     }
     private void OnDestroy()
     {
@@ -34,6 +50,9 @@ public class Bulb : MonoBehaviour
 
     public void CheckPlayer(GameObject player, LayerMask obstacleMask)
     {
+
+        if (isExtinguished) return;
+        if (spawnTime > 0) return;
         Vector3 diff = player.transform.position - transform.position;
         float sqrDist = diff.sqrMagnitude;
 
@@ -77,6 +96,44 @@ public class Bulb : MonoBehaviour
                     GameEvents.PlayerEvents.OnTakeLightDamage?.Invoke(player, damageInfo);
                 }
             }
+        }
+    }
+    /// <summary>
+    /// 電球を消灯させる処理（1秒間点滅しながら光が弱くなる）
+    /// </summary>
+    public void Extinguish()
+    {
+        if (isExtinguished) return;
+        isExtinguished = true;
+
+        if (bulbLight != null)
+        {
+            float originalIntensity = bulbLight.intensity;
+
+            // シーケンス作成
+            Sequence seq = DOTween.Sequence();
+
+            
+            seq.Append(bulbLight.DOIntensity(0, 0.25f));                    // 暗くなる
+            seq.Append(bulbLight.DOIntensity(originalIntensity, 0.25f));    // 明るくなる
+            seq.Append(bulbLight.DOIntensity(0, 0.25f));                    // 暗くなる
+            seq.Append(bulbLight.DOIntensity(originalIntensity, 0.25f));    // 明るくなる
+
+            
+            seq.Append(bulbLight.DOIntensity(0, 0.5f));
+
+            // 完了後に削除
+            seq.OnComplete(() =>
+            {
+                if (isDebug) Debug.Log($"[BULB] {name} extinguished and destroyed.");
+                Destroy(gameObject);
+            });
+
+            if (isDebug) Debug.Log($"[BULB] {name} extinguish sequence started.");
+        }
+        else
+        {
+            Destroy(gameObject);
         }
     }
 }

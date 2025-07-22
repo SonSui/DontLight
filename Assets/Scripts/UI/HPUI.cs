@@ -32,6 +32,8 @@ public class HPUI : MonoBehaviour
 
     public Sprite normalDecorate; // 通常の装飾スプライト
     public Sprite damagedDecorate; // ダメージを受けたときの装飾スプライト
+    public Sprite deadDecorate; // 死亡時の装飾スプライト
+    private bool isDead = false; // 死亡状態かどうかのフラグ
 
     public Color playerColor = Color.white; // プレイヤーの色
 
@@ -82,12 +84,16 @@ public class HPUI : MonoBehaviour
         // デフォルトの装飾スプライトを設定
         decorateImage.sprite = normalDecorate;
         // 初期状態のHPバーを更新
-        UpdateHPBar(new HPInfo(currentHP, currentHPMax, isDamaged, defaultHPMax));
+        UpdateHP(new HPInfo(currentHP, currentHPMax, isDamaged, defaultHPMax));
     }
-    public void UpdateHPBar(HPInfo hpInfo)
+    public void UpdateHP(HPInfo hpInfo)
     {
         currentHP = hpInfo.currentHP;
         currentHPMax = hpInfo.currentHPMax;
+        if (currentHP <= 0)
+        {
+            isDead = true;
+        }
         // 最大HPが設定されている場合はそれを使用
         if (hpInfo.defaultHPMax > 0f)
         {
@@ -145,7 +151,14 @@ public class HPUI : MonoBehaviour
             damageResetTween = DOVirtual.DelayedCall(damageDuration, () =>
             {
                 isDamaged = false;
-                decorateImage.sprite = normalDecorate;
+                if (isDead)
+                {
+                    decorateImage.sprite = deadDecorate; // 死亡時の装飾に変更
+                }
+                else
+                {
+                    decorateImage.sprite = normalDecorate; // 通常の装飾に戻す
+                }
 
                 // ダメージを受けたときの装飾のリセット
                 if (shakeTween != null)
@@ -153,19 +166,19 @@ public class HPUI : MonoBehaviour
                     shakeTween.Kill();
                     shakeTween = null;
                 }
-
+                
                 // 装飾の位置を元に戻す
                 decorate.GetComponent<RectTransform>().anchoredPosition = defaultDecoratePosition;
             }, false);
         }
     }
-    public void SetPlayerColor(Color color)
+    public void SetUIColor(Color color)
     {
-        playerColor = color;
-        if (decorateImage != null)
+        if (decorate != null)
         {
-            decorateImage.color = playerColor; // 装飾の色を更新
+            var img = decorate.GetComponent<Image>();
+            if (img != null)
+                img.color = color;
         }
     }
-
 }
