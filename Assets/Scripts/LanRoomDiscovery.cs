@@ -3,17 +3,20 @@ using System.Net;
 using System.Net.Sockets;
 using System.Text;
 using UnityEngine;
+using UnityEngine.UI;
 using System.Collections.Generic;
+using System.Collections;
 
 public class LanRoomDiscovery : MonoBehaviour
 {
+    public GameObject listPanelPrefab;
+    public Transform contentParent;
     private UdpClient udpReceiver;
-    private Dictionary<string, string> roomMap = new Dictionary<string, string>();
-    private Dictionary<string, float> roomLastSeen = new Dictionary<string, float>();
-
-    private Dictionary<string, Dictionary<string, string>> roomDetail = new Dictionary<string, Dictionary<string, string>>();
-    private float roomTimeout = 3f;
+    private long nowTimer;
+    private float roomRefresh = 1f;
+    private float roomTimeout = 1200f;
     private bool isListening = true;
+    private Dictionary<string, Dictionary<string, string>> roomDetail = new Dictionary<string, Dictionary<string, string>>();
 
     void Start()
     {
@@ -29,28 +32,39 @@ public class LanRoomDiscovery : MonoBehaviour
         {
             Debug.LogError("❌ 启动监听失败: " + ex.Message);
         }
+        StartCoroutine(RepeatFillinList());
     }
 
     void Update()
     {
         // 清理超时未响应的房间
-        float now = Time.time;
+        if (roomDetail.Count == 0) return;
+        nowTimer = GetCurrentUnixTimestampMilliseconds();
+        List<string> keysToRemove = new List<string>();
         foreach (KeyValuePair<string, Dictionary<string, string>> room in roomDetail)
         {
             string roomIP = room.Key;
             Dictionary<string, string> details = room.Value;
-            Debug.Log($"房间IP: {roomIP}");
+            //Debug.Log($"房间IP: {roomIP}");
             foreach (KeyValuePair<string, string> detail in details)
             {
-                Debug.Log($"  {detail.Key} : {detail.Value}");
+                //Debug.Log($"  {detail.Key} : {detail.Value}");
                 if (detail.Key == "receiveTime")
                 {
-                    float receiveTime = float.Parse(detail.Value);
-                    if (now - receiveTime > roomTimeout)
-                        roomDetail.Remove(roomIP);
+                    long receiveTime = long.Parse(detail.Value);
+                    //Debug.Log("nowTimer : " + nowTimer);
+                    //Debug.Log("nowTimer - receiveTime : " + (nowTimer - receiveTime));
+                    if (nowTimer - receiveTime > roomTimeout)
+                    {
+                        keysToRemove.Add(roomIP);
+                    }
+                        
                 }
             }
         }
+        // 统一删除超时房间
+        foreach (string key in keysToRemove)
+            roomDetail.Remove(key);
     }
 
     void OnReceive(IAsyncResult result)
@@ -62,10 +76,10 @@ public class LanRoomDiscovery : MonoBehaviour
             IPEndPoint remoteEP = new IPEndPoint(IPAddress.Any, 0);
             byte[] data = udpReceiver.EndReceive(result, ref remoteEP);
             string message = Encoding.UTF8.GetString(data);
-            Debug.Log($"📨 收到房间广播：{message} 来自：{remoteEP.Address}");
+            //Debug.Log($"📨 收到房间广播：{message} 来自：{remoteEP.Address}");
             string messageIP = remoteEP.Address.ToString();
             Dictionary<string, string> room = ParseToDictionary(message);
-            room.Add("receiveTime", Time.time.ToString());
+            room.Add("receiveTime", GetCurrentUnixTimestampMilliseconds().ToString());
             UpdateRoomDetail(messageIP, room);
         }
         catch (Exception ex)
@@ -111,12 +125,61 @@ public class LanRoomDiscovery : MonoBehaviour
     void OnDestroy()
     {
         isListening = false;
-
         if (udpReceiver != null)
         {
             udpReceiver.Close();
             udpReceiver = null;
             Debug.Log("🛑 停止监听房间广播。");
         }
+    }
+
+    IEnumerator RepeatFillinList()
+    {
+        while (true)
+        {
+            FillinList();
+            yield return new WaitForSeconds(roomRefresh);
+        }
+    }
+
+    private void FillinList()
+    {
+        int eleNum = 0;
+        foreach (Transform child in contentParent)
+            GameObject.Destroy(child.gameObject);
+        Debug.Log("roomDetail :" + roomDetail.Count);
+        GameObject newPanel = null;
+        foreach (KeyValuePair<string, Dictionary<string, string>> room in roomDetail)
+        {
+            string roomIP = room.Key;
+            Dictionary<string, string> details = room.Value;
+            if (eleNum % 2 == 0)
+                newPanel = Instantiate(listPanelPrefab, contentParent);
+
+            if (newPanel != null)
+            {
+                Transform firstChild = newPanel.transform.GetChild(eleNum % 2);
+                Transform secondChild = firstChild.GetChild(0);
+                Text textComponent = secondChild.GetComponent<Text>();
+                if (textComponent != null)
+                {
+                    foreach (KeyValuePair<string, string> detail in details)
+                    {
+                        if (detail.Key == "roomName")
+                        {
+                            textComponent.text = detail.Value;
+                        }
+                        firstChild.gameObject.SetActive(true);
+                    }
+                }
+            }
+            eleNum++;
+        }
+    }
+
+    long GetCurrentUnixTimestampMilliseconds()
+    {
+        DateTimeOffset now = DateTimeOffset.UtcNow;
+        return now.ToUnixTimeMilliseconds();
     }
 }
