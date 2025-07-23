@@ -1,4 +1,4 @@
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
@@ -48,8 +48,20 @@ public class SpawnGrenade : MonoBehaviour
             currentTarget = targetList.Count > 0 ? targetList[currentTargetIndex] : null;
         }
 
-        lineRenderer.enabled = true;
         rangeIndicatorCanvas.SetActive(true);
+
+        // Only enable the LineRenderer where there is a target within range.
+        // ターゲットが範囲内にある場合のみ、LineRendererを有効にします。
+        if (useLockOn)
+        {
+            if (currentTarget != null)
+                lineRenderer.enabled = true;
+        }
+        else
+        {
+            if (GetMouseTarget(out _))
+                lineRenderer.enabled = true;
+        }
     }
 
     public void CancelAimingAndThrow()
@@ -57,6 +69,14 @@ public class SpawnGrenade : MonoBehaviour
         isAiming = false;
         lineRenderer.enabled = false;
         rangeIndicatorCanvas.SetActive(false);
+
+        if (currentTarget == null ||
+            Vector3.Distance(transform.position, currentTarget.position) > maxThrowRange)
+        {
+            Debug.Log("No target, cancel throwing");
+            return;
+        }
+
         ThrowGrenade(cachedVelocity);
     }
 
@@ -70,12 +90,24 @@ public class SpawnGrenade : MonoBehaviour
 
     private void Update()
     {
-        if (!isAiming) return;
+        if (!isAiming)
+        {
+            lineRenderer.enabled = false;
+            return;
+        }
 
         Vector3 targetPoint;
 
         if (useLockOn && currentTarget != null)
         {
+            float distance = Vector3.Distance(transform.position, currentTarget.position);
+            if (distance > maxThrowRange)
+            {
+                currentTarget = null;
+                lineRenderer.enabled = false;
+                return;
+            }
+
             targetPoint = currentTarget.position;
         }
         else if (GetMouseTarget(out Vector3 mouseHit))
@@ -84,12 +116,15 @@ public class SpawnGrenade : MonoBehaviour
         }
         else
         {
+            lineRenderer.enabled = false;
             return;
         }
 
         cachedVelocity = CalculateLaunchVelocity(transform.position, targetPoint, flightTime);
         ShowTrajectory(transform.position, cachedVelocity);
     }
+
+
 
     private void ThrowGrenade(Vector3 velocity)
     {
@@ -131,7 +166,7 @@ public class SpawnGrenade : MonoBehaviour
 
         foreach (Collider hit in hits)
         {
-            if (hit.transform != transform)
+            if (hit.transform.root != transform.root) // 避免锁定自己
             {
                 targetList.Add(hit.transform);
             }
