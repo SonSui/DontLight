@@ -436,6 +436,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: PlayerChan
       objectReference: {fileID: 0}
+    - target: {fileID: 8412751905399671330, guid: 030c98000ec94b945af8c4a20383fa51, type: 3}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -506,7 +510,7 @@ MonoBehaviour:
       m_SingletonActionBindings: []
       m_Flags: 0
     m_Reference: {fileID: 0}
-  m_PlayerPrefab: {fileID: 8412751905399671330, guid: f9d143e24f9016248b431307a5dc4a12, type: 3}
+  m_PlayerPrefab: {fileID: 1361229401}
   m_SplitScreen: 0
   m_MaintainAspectRatioInSplitScreen: 0
   m_FixedNumberOfSplitScreens: -1
@@ -899,6 +903,11 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   m_Asset: {fileID: -944628639613478452, guid: 052faaac586de48259a63d0c4782560b, type: 3}
   m_ActionId: c95b2375-e6d9-4b88-9c4c-c5e76515df4b
+--- !u!1 &1361229401 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 8412751905399671330, guid: 030c98000ec94b945af8c4a20383fa51, type: 3}
+  m_PrefabInstance: {fileID: 533682873}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1001 &1373657215
 PrefabInstance:
   m_ObjectHideFlags: 0
