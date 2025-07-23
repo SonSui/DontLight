@@ -27,7 +27,7 @@ public class RoomLANConfig : NetworkBehaviour
         playerStat = StaticEvents.playerStat;
         Debug.Log("RoomLANConfig playerStat : " + playerStat);
         if (playerStat == "Host") StartHost();
-        //else StartClient();
+        else StartClient();
 
         // 注册客户端连接事件
         NetworkManager.Singleton.OnClientConnectedCallback += OnClientConnected;

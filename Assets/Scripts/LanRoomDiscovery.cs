@@ -27,11 +27,11 @@ public class LanRoomDiscovery : MonoBehaviour
             udpReceiver.EnableBroadcast = true;
             udpReceiver.BeginReceive(OnReceive, null);
             isListening = true;
-            Debug.Log("🎧 大厅开始监听房间广播...");
+            Debug.Log("🎧 ロビーはルームから放送の監視を始めます…");
         }
         catch (Exception ex)
         {
-            Debug.LogError("❌ 启动监听失败: " + ex.Message);
+            Debug.LogError("❌ 監視を開始できませんでした: " + ex.Message);
         }
         StartCoroutine(RepeatFillinList());
     }
@@ -46,24 +46,18 @@ public class LanRoomDiscovery : MonoBehaviour
         {
             string roomIP = room.Key;
             Dictionary<string, string> details = room.Value;
-            //Debug.Log($"房间IP: {roomIP}");
             foreach (KeyValuePair<string, string> detail in details)
             {
-                //Debug.Log($"  {detail.Key} : {detail.Value}");
                 if (detail.Key == "receiveTime")
                 {
                     long receiveTime = long.Parse(detail.Value);
-                    //Debug.Log("nowTimer : " + nowTimer);
-                    //Debug.Log("nowTimer - receiveTime : " + (nowTimer - receiveTime));
                     if (nowTimer - receiveTime > roomTimeout)
                     {
                         keysToRemove.Add(roomIP);
-                    }
-                        
+                    } 
                 }
             }
         }
-        // 统一删除超时房间
         foreach (string key in keysToRemove)
             roomDetail.Remove(key);
     }
@@ -77,27 +71,21 @@ public class LanRoomDiscovery : MonoBehaviour
             IPEndPoint remoteEP = new IPEndPoint(IPAddress.Any, 0);
             byte[] data = udpReceiver.EndReceive(result, ref remoteEP);
             string message = Encoding.UTF8.GetString(data);
-            //Debug.Log($"📨 收到房间广播：{message} 来自：{remoteEP.Address}");
             string messageIP = remoteEP.Address.ToString();
             Dictionary<string, string> room = ParseToDictionary(message);
             room.Add("receiveTime", GetCurrentUnixTimestampMilliseconds().ToString());
             UpdateRoomDetail(messageIP, room);
-        }
-        catch (Exception ex)
+        } catch (Exception e)
         {
-            //Debug.LogWarning("接收出错：" + ex.Message);
-        }
-        finally
+        } finally
         {
             if (isListening && udpReceiver != null)
             {
                 try
                 {
                     udpReceiver.BeginReceive(OnReceive, null);
-                }
-                catch (Exception e)
+                } catch (Exception e)
                 {
-                    //Debug.LogWarning("BeginReceive 失败：" + e.Message);
                 }
             }
         }
@@ -130,7 +118,7 @@ public class LanRoomDiscovery : MonoBehaviour
         {
             udpReceiver.Close();
             udpReceiver = null;
-            Debug.Log("🛑 停止监听房间广播。");
+            Debug.Log("🛑 ルームから放送の監視を停止します。");
         }
     }
 
@@ -148,7 +136,6 @@ public class LanRoomDiscovery : MonoBehaviour
         int eleNum = 0;
         foreach (Transform child in contentParent)
             GameObject.Destroy(child.gameObject);
-        Debug.Log("roomDetail :" + roomDetail.Count);
         GameObject newPanel = null;
         foreach (KeyValuePair<string, Dictionary<string, string>> room in roomDetail)
         {
@@ -160,18 +147,39 @@ public class LanRoomDiscovery : MonoBehaviour
             if (newPanel != null)
             {
                 Transform firstChild = newPanel.transform.GetChild(eleNum % 2);
-                Transform secondChild = firstChild.GetChild(0);
-                Text textComponent = secondChild.GetComponent<Text>();
-                if (textComponent != null)
+                Transform roomName = firstChild.GetChild(0);
+                Text roomNameText = roomName.GetComponent<Text>();
+                Transform roomStat = firstChild.GetChild(3);
+                Text roomStatText = roomStat.GetComponent<Text>();
+                foreach (KeyValuePair<string, string> detail in details)
                 {
-                    foreach (KeyValuePair<string, string> detail in details)
+                    if (detail.Key == "roomName")
                     {
-                        if (detail.Key == "roomName")
-                        {
-                            textComponent.text = detail.Value;
-                        }
-                        firstChild.gameObject.SetActive(true);
+                        if (roomNameText != null) roomNameText.text = detail.Value;
                     }
+                    if (detail.Key == "roomStat")
+                    {
+                        if (roomStatText != null)
+                        {
+                            if (detail.Value == "preparation")
+                            {
+                                roomStatText.color = new Color(0.3216f, 0.4784f, 0.1569f, 1f);
+                                roomStatText.text = "墓を掘ってる";
+                            }
+                            else
+                            {
+                                roomStatText.color = new Color(0.8f, 0.1412f, 0.1608f, 1f);
+                                roomStatText.text = "埋葬されてる";
+                            }
+                        }
+                    }
+                    firstChild.gameObject.SetActive(true);
+                }
+                Transform join = firstChild.GetChild(13);
+                JoinRoomButton joinButton = join.GetComponent<JoinRoomButton>();
+                if (joinButton != null)
+                {
+                    joinButton.roomIP = roomIP;
                 }
             }
             eleNum++;
