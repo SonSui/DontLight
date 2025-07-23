@@ -1,6 +1,5 @@
 ﻿using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.InputSystem;
 
 [RequireComponent(typeof(LineRenderer))]
 public class SpawnGrenade : MonoBehaviour
@@ -36,6 +35,57 @@ public class SpawnGrenade : MonoBehaviour
         rangeIndicatorCanvas.SetActive(false);
     }
 
+    private void Update()
+    {
+        if (!isAiming)
+        {
+            lineRenderer.enabled = false;
+            return;
+        }
+
+        Vector3 targetPoint;
+
+        if (useLockOn)
+        {
+            // 手柄模式：只在有敌人时显示
+            if (targetList.Count == 0)
+            {
+                // 没敌人，关闭线条，什么也不显示
+                currentTarget = null;
+                lineRenderer.enabled = false;
+                return;
+            }
+            else
+            {
+                currentTarget = targetList[currentTargetIndex];
+                float distance = Vector3.Distance(transform.position, currentTarget.position);
+                if (distance > maxThrowRange)
+                {
+                    // 目标超出范围，不显示线条
+                    currentTarget = null;
+                    lineRenderer.enabled = false;
+                    return;
+                }
+                targetPoint = currentTarget.position;
+            }
+        }
+        else
+        {
+            // 鼠标模式，显示鼠标位置轨迹
+            if (!GetMouseTarget(out Vector3 mouseHit))
+            {
+                lineRenderer.enabled = false;
+                return;
+            }
+            targetPoint = mouseHit;
+        }
+
+        cachedVelocity = CalculateLaunchVelocity(transform.position, targetPoint, flightTime);
+        ShowTrajectory(transform.position, cachedVelocity);
+        lineRenderer.enabled = true;
+    }
+
+
     public void StartAiming(bool lockOnMode)
     {
         isAiming = true;
@@ -47,21 +97,17 @@ public class SpawnGrenade : MonoBehaviour
             currentTargetIndex = 0;
             currentTarget = targetList.Count > 0 ? targetList[currentTargetIndex] : null;
         }
+        else
+        {
+            currentTarget = null;
+        }
 
         rangeIndicatorCanvas.SetActive(true);
 
-        // Only enable the LineRenderer where there is a target within range.
-        // ターゲットが範囲内にある場合のみ、LineRendererを有効にします。
-        if (useLockOn)
-        {
-            if (currentTarget != null)
-                lineRenderer.enabled = true;
-        }
-        else
-        {
-            if (GetMouseTarget(out _))
-                lineRenderer.enabled = true;
-        }
+        if (useLockOn && currentTarget != null)
+            lineRenderer.enabled = true;
+        else if (!useLockOn && GetMouseTarget(out _))
+            lineRenderer.enabled = true;
     }
 
     public void CancelAimingAndThrow()
@@ -70,11 +116,19 @@ public class SpawnGrenade : MonoBehaviour
         lineRenderer.enabled = false;
         rangeIndicatorCanvas.SetActive(false);
 
-        if (currentTarget == null ||
-            Vector3.Distance(transform.position, currentTarget.position) > maxThrowRange)
+        // 投掷条件判断
+        if (useLockOn)
         {
-            Debug.Log("No target, cancel throwing");
-            return;
+            if (currentTarget == null ||
+                Vector3.Distance(transform.position, currentTarget.position) > maxThrowRange)
+            {
+                Debug.Log("No target, cancel throwing");
+                return;
+            }
+        }
+        else
+        {
+            // 如果非锁定，cachedVelocity是根据鼠标点算的，理论上没问题
         }
 
         ThrowGrenade(cachedVelocity);
@@ -88,57 +142,25 @@ public class SpawnGrenade : MonoBehaviour
         currentTarget = targetList[currentTargetIndex];
     }
 
-    private void Update()
-    {
-        if (!isAiming)
-        {
-            lineRenderer.enabled = false;
-            return;
-        }
-
-        Vector3 targetPoint;
-
-        if (useLockOn && currentTarget != null)
-        {
-            float distance = Vector3.Distance(transform.position, currentTarget.position);
-            if (distance > maxThrowRange)
-            {
-                currentTarget = null;
-                lineRenderer.enabled = false;
-                return;
-            }
-
-            targetPoint = currentTarget.position;
-        }
-        else if (GetMouseTarget(out Vector3 mouseHit))
-        {
-            targetPoint = mouseHit;
-        }
-        else
-        {
-            lineRenderer.enabled = false;
-            return;
-        }
-
-        cachedVelocity = CalculateLaunchVelocity(transform.position, targetPoint, flightTime);
-        ShowTrajectory(transform.position, cachedVelocity);
-    }
-
-
-
     private void ThrowGrenade(Vector3 velocity)
     {
         GameObject grenade = Instantiate(grenadePrefab, transform.position, Quaternion.identity);
         Rigidbody rb = grenade.GetComponent<Rigidbody>();
         if (rb != null)
         {
-            rb.linearVelocity = velocity;
+            rb.linearVelocity = velocity;  // 这里改成rb.velocity，不是linearVelocity
         }
     }
 
     private bool GetMouseTarget(out Vector3 hitPoint)
     {
-        Ray ray = mainCamera.ScreenPointToRay(Mouse.current.position.ReadValue());
+        if (mainCamera == null)
+        {
+            hitPoint = Vector3.zero;
+            return false;
+        }
+
+        Ray ray = mainCamera.ScreenPointToRay(UnityEngine.InputSystem.Mouse.current.position.ReadValue());
         Plane groundPlane = new Plane(Vector3.up, transform.position);
 
         if (groundPlane.Raycast(ray, out float enter))
