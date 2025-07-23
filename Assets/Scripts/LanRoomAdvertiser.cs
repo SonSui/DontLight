@@ -33,9 +33,7 @@ public class LanRoomAdvertiser : MonoBehaviour
 
     void BroadcastRoomInfo()
     {
-        num++;
-        //string roomInfo = "ROOM_INFO|房间A|人数:" + num + "/4|IP:" + StaticEvents.hostIP;
-        string roomInfo = "roomName=Room" + StaticEvents.hostIP + ";playerNum=" + num;
+        string roomInfo = "roomName=Room" + StaticEvents.hostIP + ";playerNum=" + num + ";roomStat=preparation";
         byte[] data = Encoding.UTF8.GetBytes(roomInfo);
 
         IPEndPoint endPoint = new IPEndPoint(IPAddress.Broadcast, 8888);
