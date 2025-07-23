@@ -1,4 +1,4 @@
-using System.Collections.Generic;
+ï»¿using System.Collections.Generic;
 using UnityEngine;
 
 public class MapGenerator : MonoBehaviour
@@ -7,26 +7,26 @@ public class MapGenerator : MonoBehaviour
 
     private int[,] mapData;
 
-    // ƒ}ƒbƒv‚ÌƒXƒ^[ƒgˆÊ’ui¶ã‚ÌŠî€“_‚È‚Çj
+    // ãƒãƒƒãƒ—ã®ã‚¹ã‚¿ãƒ¼ãƒˆä½ç½®ï¼ˆå·¦ä¸Šã®åŸºæº–ç‚¹ãªã©ï¼‰
     public Vector3 mapOrigin = new Vector3(-25f, 0.5f, 0f);
-    public GameObject mapParent; //¶¬•¨‚ÌeƒIƒuƒWƒFƒNƒg ‚±‚ê‚ª‚È‚¢‚ÆƒqƒGƒ‰ƒ‹ƒL[‚ªŒ©‚Ã‚ç‚¢
+    public GameObject mapParent; // ç”Ÿæˆç‰©ã®è¦ªã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆ
+
+    public TextAsset mapTextFile;
+
     private void Start()
     {
-        LoadMapDataFromText("map"); // Resources/map.txt
+        if (mapTextFile == null)
+        {
+            Debug.LogError("ãƒãƒƒãƒ—ãƒ†ã‚­ã‚¹ãƒˆãƒ•ã‚¡ã‚¤ãƒ«ãŒæŒ‡å®šã•ã‚Œã¦ã„ã¾ã›ã‚“ã€‚");
+            return;
+        }
+        LoadMapDataFromTextAsset(mapTextFile);
         GenerateMap();
     }
 
-    void LoadMapDataFromText(string fileName)
+    void LoadMapDataFromTextAsset(TextAsset textAsset)
     {
-        TextAsset textAsset = Resources.Load<TextAsset>(fileName);
-
-        if (textAsset == null)
-        {
-            Debug.LogError("ƒ}ƒbƒvƒtƒ@ƒCƒ‹‚ªŒ©‚Â‚©‚è‚Ü‚¹‚ñ: " + fileName);
-            return;
-        }
-
-        string[] lines = textAsset.text.Split('\n');
+        string[] lines = textAsset.text.Split(new[] { '\r', '\n' }, System.StringSplitOptions.RemoveEmptyEntries);
         int height = lines.Length;
         int width = lines[0].Trim().Length;
 
@@ -49,17 +49,37 @@ public class MapGenerator : MonoBehaviour
         {
             for (int x = 0; x < mapData.GetLength(1); x++)
             {
-                if (mapData[z, x] != 0)
+                int tile = mapData[z, x];
+                if (tile == 0) continue;
+
+                GameObject prefab = MapPrefabs[tile - 1];
+                Vector3 basePos = new Vector3(
+                    mapOrigin.x + x,
+                    mapOrigin.y,
+                    mapOrigin.z - z
+                );
+
+                Vector3 offset = Vector3.zero;
+
+                if (tile == 3)
                 {
-                    GameObject prefab = MapPrefabs[mapData[z, x] - 1];
-                    Vector3 pos = new Vector3(
-                        mapOrigin.x - x,
-                        mapOrigin.y,
-                        mapOrigin.z + z
-                    );
-                    GameObject obj = Instantiate(prefab, pos, prefab.transform.rotation);
-                    obj.transform.parent = mapParent.transform;
+                    offset = new Vector3(0.4f, 0f, 0f);
                 }
+                if(tile == 4)
+                {
+                    offset = new Vector3(-0.2f, 0f, 0f);
+                }
+                if (tile == 5)
+                {
+                    offset = new Vector3(-0.2f, 0f, 0.2f);
+                }
+                if (tile == 6)
+                {
+                    offset = new Vector3(0.2f, 0f, 0.4f);
+                }
+                Quaternion rotation = prefab.transform.rotation;
+                GameObject obj = Instantiate(prefab, basePos + offset, rotation);
+                obj.transform.parent = mapParent.transform;
             }
         }
     }
