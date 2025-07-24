@@ -21,8 +21,8 @@ public class BatteryUI : MonoBehaviour
     private float minFillLength = 56f; // 最小フィルの長さ（バッテリーUIが完全に空でない場合の最小値）
 
     public float fillDuration = 0.1f; // バッテリーUIのフィルが変化する時間
-    private float currentBattery = 100f; // 現在のバッテリー残量
-    private float maxBattery = 100f; // 最大バッテリー残量
+    private float currentBattery = 10f; // 現在のバッテリー残量
+    private float maxBattery = 10f; // 最大バッテリー残量
     private Tween batteryTween; // バッテリーUIのフィルが変化するTween
     private bool isCharging = false; // バッテリーが充電中かどうか
     private Tween effectTween;

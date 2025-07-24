@@ -63,6 +63,6 @@ public class SceneTransitionManager : MonoBehaviour
         fadeImage.color = new Color(0, 0, 0, targetAlpha);
 
         if (targetAlpha == 0)
-            fadeImage.gameObject.SetActive(false);
+            fadeImage.raycastTarget = false;
     }
 }
