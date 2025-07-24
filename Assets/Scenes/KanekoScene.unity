@@ -1452,8 +1452,16 @@ PrefabInstance:
       value: 
       objectReference: {fileID: 4900000, guid: 386856392a24efd409d260d9236ee059, type: 3}
     - target: {fileID: 4443711220597828550, guid: aece17fd238aef542b6e28efb9e47dbf, type: 3}
+      propertyPath: tileTextFile
+      value: 
+      objectReference: {fileID: 4900000, guid: 41de827598fd9314a85eee219f8c5261, type: 3}
+    - target: {fileID: 4443711220597828550, guid: aece17fd238aef542b6e28efb9e47dbf, type: 3}
       propertyPath: MapPrefabs.Array.size
       value: 6
+      objectReference: {fileID: 0}
+    - target: {fileID: 4443711220597828550, guid: aece17fd238aef542b6e28efb9e47dbf, type: 3}
+      propertyPath: TilePrefabs.Array.size
+      value: 3
       objectReference: {fileID: 0}
     - target: {fileID: 4443711220597828550, guid: aece17fd238aef542b6e28efb9e47dbf, type: 3}
       propertyPath: 'MapPrefabs.Array.data[3]'
@@ -1479,8 +1487,21 @@ PrefabInstance:
       propertyPath: 'MapPrefabs.Array.data[8]'
       value: 
       objectReference: {fileID: 4786304065137327021, guid: c838c6b7bf382314186380b99052ea69, type: 3}
+    - target: {fileID: 4443711220597828550, guid: aece17fd238aef542b6e28efb9e47dbf, type: 3}
+      propertyPath: 'TilePrefabs.Array.data[0]'
+      value: 
+      objectReference: {fileID: 2943105866617024187, guid: 995874d9da99eed45913fd026e8d3633, type: 3}
+    - target: {fileID: 4443711220597828550, guid: aece17fd238aef542b6e28efb9e47dbf, type: 3}
+      propertyPath: 'TilePrefabs.Array.data[1]'
+      value: 
+      objectReference: {fileID: 202702944715300642, guid: 6c469f82fbda10b43854217dcd93a88c, type: 3}
+    - target: {fileID: 4443711220597828550, guid: aece17fd238aef542b6e28efb9e47dbf, type: 3}
+      propertyPath: 'TilePrefabs.Array.data[2]'
+      value: 
+      objectReference: {fileID: 4786304065137327021, guid: c838c6b7bf382314186380b99052ea69, type: 3}
     m_RemovedComponents: []
-    m_RemovedGameObjects: []
+    m_RemovedGameObjects:
+    - {fileID: 2429738335835449213, guid: aece17fd238aef542b6e28efb9e47dbf, type: 3}
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: aece17fd238aef542b6e28efb9e47dbf, type: 3}
