@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 3273539174483927258}
   - component: {fileID: 759144338396566544}
   - component: {fileID: 2746536730986735605}
-  m_Layer: 0
+  m_Layer: 8
   m_Name: 03Fencecorner
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -29,7 +29,7 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: -0, y: 0, z: 0}
-  m_LocalScale: {x: 0.6, y: 0.8, z: 0.3}
+  m_LocalScale: {x: 0.6, y: 1, z: 0.3}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
