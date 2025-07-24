@@ -127,7 +127,10 @@ public class PlayerMovement : MonoBehaviour
 
     public void OnDeviceChange(PlayerInput input)
     {
-        isGampadConnected = input.currentControlScheme.Equals("Gamepad");
+        if (input != null && !string.IsNullOrEmpty(input.currentControlScheme))
+        {
+            isGampadConnected = input.currentControlScheme.Equals("Gamepad");
+        }
     }
 
     private void OnThrowStarted(InputAction.CallbackContext ctx)
