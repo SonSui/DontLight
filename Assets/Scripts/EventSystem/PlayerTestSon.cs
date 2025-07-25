@@ -9,6 +9,9 @@ public class PlayerTestSon : MonoBehaviour
     public float maxHP = 100f;
     public bool isTest = false;
     private PlayerData playerData = new PlayerData();
+    public Material playerMaterial;
+    private Material usingMaterial;
+    public Renderer playerRenderer;
 
 
     public void SetIndex(int index)
@@ -18,6 +21,18 @@ public class PlayerTestSon : MonoBehaviour
     public void SetPlayerData(PlayerData data)
     {
         playerData = data;
+
+        usingMaterial = new Material(playerMaterial);
+        usingMaterial.SetColor("_MainColor", playerData.playerColor);
+        usingMaterial.SetColor("_DissolveColor", playerData.playerColor);
+        if (playerRenderer != null && playerRenderer.material != null)
+        {
+            playerRenderer.material = usingMaterial;
+        }
+        else
+        {
+            Debug.LogWarning("PlayerRenderer or Material is not set.");
+        }
     }
     private void Start()
     {

@@ -250,7 +250,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1027531195168768780}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 0c4337315f0d26d4d8c51557619e755c, type: 3}
   m_Name: 
@@ -1439,7 +1439,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d5a57f767e5e46a458fc5d3c628d0cbb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  GlobalObjectIdHash: 572263065
+  GlobalObjectIdHash: 580192995
   InScenePlacedSourceGlobalObjectIdHash: 0
   DeferredDespawnTick: 0
   Ownership: 1
@@ -1512,6 +1512,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   maxHP: 100
   isTest: 0
+  playerMaterial: {fileID: 2100000, guid: d11e6205c7cc9470aacd9fde3100bfe2, type: 2}
+  playerRenderer: {fileID: 2279068378957859993}
 --- !u!114 &8030638650483274889
 MonoBehaviour:
   m_ObjectHideFlags: 0
