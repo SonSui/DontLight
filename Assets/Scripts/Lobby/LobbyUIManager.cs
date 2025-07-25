@@ -13,7 +13,7 @@ public class LobbyUIManager : MonoBehaviour
     void Start()
     {
         createButton.onClick.AddListener(CreateRoom);
-        //backButton.onClick.AddListener(BackToMenu);
+        backButton.onClick.AddListener(BackToMenu);
     }
 
     // Update is called once per frame
@@ -26,6 +26,11 @@ public class LobbyUIManager : MonoBehaviour
     {
         StaticEvents.playerStat = "Host";
         StaticEvents.hostIP = StaticEvents.GetLocalIPAddress();
+        SceneTransitionManager.Instance.LoadScene("RoomScene");
+    }
+
+    public void BackToMenu()
+    {
         SceneTransitionManager.Instance.LoadScene("RoomScene");
     }
 }
