@@ -7,7 +7,7 @@ public class PlayerParameters : MonoBehaviour
 
     [SerializeField] private Renderer targetRenderer;
 
-    private void Start()
+   /* private void Start()
     {
         // Initialize the player's color to red by default for testing
         // テストのために、デフォルトでプレイヤーの色を赤に初期化します
@@ -27,5 +27,5 @@ public class PlayerParameters : MonoBehaviour
         // Set color
         // 色を設定します
         targetRenderer.material.SetColor("_MainColor", selectedColor);
-    }
+    }*/
 }

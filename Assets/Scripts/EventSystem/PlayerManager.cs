@@ -55,6 +55,7 @@ public class PlayerManager : MonoBehaviour
             inputOnly.Delete();
 
             inputPlayer.GetComponent<PlayerTestSon>().SetIndex(data.playerIndex);
+            inputPlayer.GetComponent<PlayerTestSon>().SetPlayerData(data);
 
             // ê∂ê¨ UI
             GameEvents.PlayerEvents.OnPlayerUIAdd?.Invoke(playerMap[inputPlayer.gameObject]);

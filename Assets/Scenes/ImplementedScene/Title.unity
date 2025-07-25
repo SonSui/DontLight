@@ -1168,8 +1168,6 @@ MonoBehaviour:
     sceneName: LobbyScene
   - state: 1
     sceneName: LocalPreparation
-  - state: 2
-    sceneName: Lobby
   - state: 5
     sceneName: LocalGame
   playerColors:
@@ -1177,6 +1175,7 @@ MonoBehaviour:
   - {r: 0.42745098, g: 0.42745098, b: 0.9764706, a: 1}
   - {r: 0.41960785, g: 1, b: 0.41960785, a: 1}
   - {r: 1, g: 0.92156863, b: 0.015686275, a: 1}
+  maxBulbCount: 32
 --- !u!4 &356255365
 Transform:
   m_ObjectHideFlags: 0
