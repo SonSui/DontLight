@@ -4,9 +4,10 @@ using System.Collections;
 public class PlayerParameters : MonoBehaviour
 {
     // 懐中電灯オブジェクト（ON/OFF制御用）
-    // Flashlight GameObject to be toggled on/off
+    // Flashlight GameObject to be toggled on/off and UI
     // 手电筒的游戏对象，用于开关控制
     [SerializeField] private Flashlight flashlight;
+    [SerializeField] private BatteryUI batteryUI;
 
     // 懐中電灯の最大バッテリー容量（秒数として使用）
     // Maximum flashlight battery capacity (used as duration in seconds)
@@ -33,10 +34,41 @@ public class PlayerParameters : MonoBehaviour
     // 控制手电筒定时关闭的协程引用
     private Coroutine flashlightRoutine;
 
+    private PlayerData playerData = new PlayerData();
+    public Material playerMaterial;
+    private Material usingMaterial;
+    public Renderer playerRenderer;
+
+    public void SetIndex(int index)
+    {
+        playerData.playerIndex = index;
+    }
+    public void SetPlayerData(PlayerData data)
+    {
+        playerData = data;
+
+        usingMaterial = new Material(playerMaterial);
+        usingMaterial.SetColor("_MainColor", playerData.playerColor);
+        usingMaterial.SetColor("_DissolveColor", playerData.playerColor);
+        if (playerRenderer != null && playerRenderer.material != null)
+        {
+            playerRenderer.material = usingMaterial;
+        }
+        else
+        {
+            Debug.LogWarning("PlayerRenderer or Material is not set.");
+        }
+    }
+
     private void Start()
     {
+        currentBattery = flashlightBattery;
+
         flashlight.ToggleFlashlight(true);
         flashlightIsOn = true;
+
+        batteryUI?.UpdateBattery(currentBattery, false, flashlightBattery);
+
         StartCoroutine(DisableAfterTime());
     }
 
@@ -54,6 +86,8 @@ public class PlayerParameters : MonoBehaviour
             // Increase battery level by charging value
             // 增加当前电量
             currentBattery += chargingValue;
+            currentBattery = Mathf.Min(currentBattery, flashlightBattery); // Maximize limit to flashlightBattery 最大值制限
+            GameEvents.PlayerEvents.OnBatteryChanged?.Invoke(playerData.playerIndex, currentBattery, true); // Update battery UI if available 更新 UI（充電中）
 
             // デバッグ用に現在のバッテリー残量を出力
             // Output current battery level for debugging
@@ -82,16 +116,29 @@ public class PlayerParameters : MonoBehaviour
     // 在指定时间后自动关闭手电筒的协程
     private IEnumerator DisableAfterTime()
     {
-        // 最大電池容量分だけ待機
-        // Wait for the duration equal to the battery capacity
-        // 等待与最大电量时间相同的秒数
-        yield return new WaitForSeconds(flashlightBattery);
+        float duration = flashlightBattery;
+        float interval = 1f;
+        int steps = Mathf.FloorToInt(duration / interval);
+        float batteryPerStep = flashlightBattery / steps;
 
-        // 消灯処理
-        // Turn off flashlight and reset state
-        // 关闭手电筒并重置状态
+        for (int i = 0; i < steps; i++)
+        {
+            yield return new WaitForSeconds(interval);
+
+            currentBattery -= batteryPerStep;
+            currentBattery = Mathf.Max(currentBattery, 0f);
+
+            // 实时更新 UI + 广播事件
+            GameEvents.PlayerEvents.OnBatteryChanged?.Invoke(playerData.playerIndex, currentBattery, false);
+            batteryUI?.UpdateBattery(currentBattery, false, flashlightBattery);
+        }
+
+        // 电量耗尽，关灯
         flashlight.ToggleFlashlight(false);
         flashlightIsOn = false;
         currentBattery = 0f;
+
+        GameEvents.PlayerEvents.OnBatteryChanged?.Invoke(playerData.playerIndex, currentBattery, false);
+        batteryUI?.UpdateBattery(currentBattery, false, flashlightBattery);
     }
 }
