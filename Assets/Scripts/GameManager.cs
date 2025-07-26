@@ -108,7 +108,13 @@ public class GameManager : MonoBehaviour
         PrepareUIEvents.OnSetBulbCount -= SetMaxBulbCount; // 最大電球数設定イベント
 
     }
-
+    private void Start()
+    {
+        DOVirtual.DelayedCall(0.1f, () =>
+        {
+            GameSceneEvents.OnBeforeSceneChange?.Invoke(CurrentGameState);
+        });
+    }
 
     public void RegisterPlayer(InputOnlyPlayer player)
     {
