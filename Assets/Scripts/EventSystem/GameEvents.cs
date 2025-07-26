@@ -59,6 +59,8 @@ public class GameEvents
 
         // 電球状態変化<プレーヤー番号,電球状態>（0 = 無, 1 = 持ってる, 2 = CD中）
         public static Action<int, int> OnBulbStateChanged;
+
+        public static Action<PlayerData> OnWinnerSet; // 勝者が決定したときに呼ばれるイベント
     }
     public static class Light
     {
@@ -80,5 +82,9 @@ public class GameEvents
     {
         public static Action<PlayerData> OnPlayerDataCreated;
         public static Action<int> OnSetBulbCount;
+    }
+    public static class GameSceneEvents
+    {
+        public static Action<GameState> OnBeforeSceneChange;
     }
 }
