@@ -13,6 +13,8 @@ public class PlayerTestSon : MonoBehaviour
     private Material usingMaterial;
     public Renderer playerRenderer;
 
+    public bool isWinner = false; // 勝利フラグ
+
 
     public void SetIndex(int index)
     {
@@ -47,6 +49,7 @@ public class PlayerTestSon : MonoBehaviour
 
     public void Die()
     {
+        if(isWinner) return; // 勝利者は死亡しない
         GameEvents.PlayerEvents.OnHPChanged?.Invoke(playerData.playerIndex, new HPInfo(0, 0, true));
         GameEvents.PlayerEvents.OnPlayerDied?.Invoke(this.gameObject);
         Destroy(gameObject);
@@ -56,6 +59,7 @@ public class PlayerTestSon : MonoBehaviour
     /// </summary>
     public void TakeDamage(DamageInfo damageInfo)
     {
+        if (isWinner) return; // 勝利者はダメージを受けない
         currentHP -= damageInfo.damage;
         currentHP = Mathf.Max(0, currentHP);
         maxHP = Mathf.Min((originMaxHP-currentHP)/2 + currentHP,maxHP); // 現在のHPに応じて最大HPを調整
@@ -71,6 +75,12 @@ public class PlayerTestSon : MonoBehaviour
         {
             Die();
         }
+    }
+
+    public void SetWinnder()
+    {
+        isWinner = true;
+        GameEvents.PlayerEvents.OnWinnerSet?.Invoke(playerData);
     }
 
     /// <summary>

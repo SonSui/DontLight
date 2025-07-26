@@ -50,6 +50,8 @@ public class GameManager : MonoBehaviour
     public List<Color> playerColors = new List<Color>();
     public int maxBulbCount = 32; // 最大電球数
 
+    public PlayerData winner = new PlayerData();
+
     public static GameManager Instance { get; private set; }   // シングルトンインスタンス
     private Tween stateTween; // 状態遷移アニメーション（未使用）
 
@@ -86,7 +88,9 @@ public class GameManager : MonoBehaviour
         UIEvents.OnOnlineGameStart += HandleOnlineGameStart; // オンラインゲーム開始イベント
         UIEvents.OnReturnToTitleScene += HandleOnReturnToTitle; // タイトル画面に戻るイベント
         PlayerEvents.OnPlayerRegistered += RegisterPlayer; // プレイヤー登録イベント
+        PlayerEvents.OnWinnerSet += WinnerSetted; // 勝者設定イベント
         PrepareUIEvents.OnSetBulbCount += SetMaxBulbCount; // 最大電球数設定イベント
+
 
     }
 
@@ -100,7 +104,9 @@ public class GameManager : MonoBehaviour
         UIEvents.OnOnlineGameStart -= HandleOnlineGameStart; // オンラインゲーム開始イベント
         UIEvents.OnReturnToTitleScene -= HandleOnReturnToTitle; // タイトル画面に戻るイベント
         PlayerEvents.OnPlayerRegistered -= RegisterPlayer; // プレイヤー登録イベント
+        PlayerEvents.OnWinnerSet -= WinnerSetted; // 勝者設定イベント
         PrepareUIEvents.OnSetBulbCount -= SetMaxBulbCount; // 最大電球数設定イベント
+
     }
 
 
@@ -182,6 +188,10 @@ public class GameManager : MonoBehaviour
                     
                     ClearJoinedPlayers(); // プレイヤーリストをクリア
                     registeredPlayerCount = 0; // 登録済みプレイヤー数をリセット
+
+                    winner = null; // 勝者をリセット
+
+                    GameSceneEvents.OnBeforeSceneChange?.Invoke(CurrentGameState);
                     SceneTransitionManager.Instance.LoadScene(_sceneState[CurrentGameState]);
                 }
                 else
@@ -197,6 +207,7 @@ public class GameManager : MonoBehaviour
                     {
                         _previousGameState = CurrentGameState;
                         CurrentGameState = GameState.LocalPreparation;
+                        GameSceneEvents.OnBeforeSceneChange?.Invoke(CurrentGameState);
                         SceneTransitionManager.Instance.LoadScene(_sceneState[CurrentGameState]);
                     }
                     else
@@ -217,6 +228,7 @@ public class GameManager : MonoBehaviour
                     {
                         _previousGameState = CurrentGameState;
                         CurrentGameState = GameState.LocalPlaying;
+                        GameSceneEvents.OnBeforeSceneChange?.Invoke(CurrentGameState);
                         SceneTransitionManager.Instance.LoadScene(_sceneState[CurrentGameState]);
                     }
                     else
@@ -238,6 +250,7 @@ public class GameManager : MonoBehaviour
                     {
                         _previousGameState = CurrentGameState;
                         CurrentGameState = GameState.OnlinePreparation;
+                        GameSceneEvents.OnBeforeSceneChange?.Invoke(CurrentGameState);
                         SceneTransitionManager.Instance.LoadScene(_sceneState[CurrentGameState]);
                     }
                     else
@@ -248,6 +261,30 @@ public class GameManager : MonoBehaviour
                 else
                 {
                     Debug.LogWarning("オンライン準備状態はメインメニューからのみ開始できます。");
+                }
+                break;
+
+            case GameState.LocalPlayingResults:
+                if (CurrentGameState == GameState.LocalPlaying)
+                {
+                    if (_sceneState.ContainsKey(CurrentGameState))
+                    {
+                        _previousGameState = CurrentGameState;
+                        CurrentGameState = GameState.LocalPlayingResults;
+                        DOVirtual.DelayedCall(3f, () =>
+                        {
+                            GameSceneEvents.OnBeforeSceneChange?.Invoke(CurrentGameState);
+                            SceneTransitionManager.Instance.LoadScene(_sceneState[CurrentGameState]);
+                        });
+                    }
+                    else
+                    {
+                        Debug.LogError("LocalPlayingResultsのシーンが設定されていません。");
+                    }
+                }
+                else
+                {
+                    Debug.LogWarning("ローカルプレイ結果状態はローカルプレイ状態からのみ開始できます。");
                 }
                 break;
 
@@ -292,5 +329,15 @@ public class GameManager : MonoBehaviour
     {
         maxBulbCount = count;
         Debug.Log($"最大電球数を{maxBulbCount}に設定しました。");
+    }
+    private void WinnerSetted(PlayerData data)
+    {
+        winner = data;
+        Debug.Log($"勝者が設定されました: {winner.playerName}");
+        ChangeState(GameState.LocalPlayingResults);  
+    }
+    public PlayerData GetWinner()
+    {
+        return winner;
     }
 }
