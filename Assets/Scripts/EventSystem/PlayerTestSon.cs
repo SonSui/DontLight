@@ -47,7 +47,7 @@ public class PlayerTestSon : MonoBehaviour
 
     public void Die()
     {
-        
+        GameEvents.PlayerEvents.OnHPChanged?.Invoke(playerData.playerIndex, new HPInfo(0, 0, true));
         GameEvents.PlayerEvents.OnPlayerDied?.Invoke(this.gameObject);
         Destroy(gameObject);
     }
