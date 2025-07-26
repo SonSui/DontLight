@@ -1770,10 +1770,7 @@ MonoBehaviour:
   areaCenter: {x: 0, y: 10, z: 0}
   areaSize: {x: 15, y: 15}
   prefabsToDrop:
-  - {fileID: 135388198100225501, guid: 5ebd151f707c8154faf3235dfbe711e5, type: 3}
-  - {fileID: 135388198100225501, guid: 5ebd151f707c8154faf3235dfbe711e5, type: 3}
-  - {fileID: 135388198100225501, guid: 5ebd151f707c8154faf3235dfbe711e5, type: 3}
-  - {fileID: 135388198100225501, guid: 5ebd151f707c8154faf3235dfbe711e5, type: 3}
+  - {fileID: 135388198100225501, guid: 4d0abc4f935102548ad771d2e1f5a7e7, type: 3}
   spawnInterval: 0.2
   autoDestroyTime: 12
 --- !u!4 &567991401

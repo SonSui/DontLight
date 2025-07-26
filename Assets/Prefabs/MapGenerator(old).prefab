@@ -103,8 +103,15 @@ MonoBehaviour:
   - {fileID: 6919438700757646468, guid: 194df2a43d0e59a419526044f672eaa5, type: 3}
   - {fileID: 5128504383458667611, guid: 098fa57cde74f614682057941c7b4612, type: 3}
   - {fileID: 4419179866676560492, guid: 98e959abf5cc5b44e890c7be0d3998c1, type: 3}
+  - {fileID: 2852357003823949897, guid: b597d7d78201e6748bc5e9ee652a7d6f, type: 3}
+  - {fileID: 2852357003823949897, guid: 951a6f2b1f3be544680a620cb42c27a3, type: 3}
+  - {fileID: 2852357003823949897, guid: 13e308d0056551b49afa32274f3de530, type: 3}
+  - {fileID: 2852357003823949897, guid: 6fd121ed240535a49aa5077d253a8c51, type: 3}
+  TilePrefabs: []
   mapOrigin: {x: 7, y: 0.5, z: -3}
   mapParent: {fileID: 2267183910836886046}
+  mapTextFile: {fileID: 0}
+  tileTextFile: {fileID: 0}
 --- !u!1001 &680341559518875310
 PrefabInstance:
   m_ObjectHideFlags: 0
