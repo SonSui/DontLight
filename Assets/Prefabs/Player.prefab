@@ -250,12 +250,14 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1027531195168768780}
-  m_Enabled: 0
+  m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 0c4337315f0d26d4d8c51557619e755c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  targetRenderer: {fileID: 2279068378957859993}
+  flashlight: {fileID: 6103508283073585551}
+  flashlightBattery: 10
+  chargingValue: 1.5
 --- !u!1 &1071878470493906596
 GameObject:
   m_ObjectHideFlags: 0
@@ -837,6 +839,7 @@ MonoBehaviour:
   targetLayer:
     serializedVersion: 2
     m_Bits: 128
+  isAiming: 0
 --- !u!120 &8269979311407902221
 LineRenderer:
   serializedVersion: 2
@@ -1233,7 +1236,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &6450544507179447417
 Transform:
   m_ObjectHideFlags: 0
@@ -1422,6 +1425,14 @@ MonoBehaviour:
       m_Calls: []
     m_ActionId: 9caa3d8a-6b2f-4e8e-8bad-6ede561bd9be
     m_ActionName: UI/TrackedDeviceOrientation
+  - m_PersistentCalls:
+      m_Calls: []
+    m_ActionId: 390772da-8e78-44ff-866f-583dcdaf15e1
+    m_ActionName: 'Player/CancelThrowing[/Mouse/rightButton,/XInputControllerWindows/buttonEast]'
+  - m_PersistentCalls:
+      m_Calls: []
+    m_ActionId: 0119f1c1-218b-4776-a1cf-0ae0d6a353a6
+    m_ActionName: 'Player/Charging[/XInputControllerWindows/buttonSouth,/Keyboard/c]'
   m_NeverAutoSwitchControlSchemes: 0
   m_DefaultControlScheme: 
   m_DefaultActionMap: Player
@@ -1439,7 +1450,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d5a57f767e5e46a458fc5d3c628d0cbb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  GlobalObjectIdHash: 580192995
+  GlobalObjectIdHash: 572263065
   InScenePlacedSourceGlobalObjectIdHash: 0
   DeferredDespawnTick: 0
   Ownership: 1
@@ -1531,6 +1542,7 @@ MonoBehaviour:
   rotateSpeed: 5
   GamepadDeadZone: 0.1
   grenadeThrower: {fileID: 4306944721514377069}
+  playerParams: {fileID: 8862859558315821962}
 --- !u!1 &9107833944958082639
 GameObject:
   m_ObjectHideFlags: 0
@@ -1640,6 +1652,11 @@ PrefabInstance:
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 6357cb7f47ac52d40a9b90d2170ef365, type: 3}
+--- !u!1 &6103508283073585551 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 8693933339924145457, guid: 6357cb7f47ac52d40a9b90d2170ef365, type: 3}
+  m_PrefabInstance: {fileID: 3175893421271008446}
+  m_PrefabAsset: {fileID: 0}
 --- !u!4 &6917481604809046837 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 8353296479458885515, guid: 6357cb7f47ac52d40a9b90d2170ef365, type: 3}

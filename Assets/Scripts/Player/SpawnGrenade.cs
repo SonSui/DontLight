@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using UnityEngine;
 
 [RequireComponent(typeof(LineRenderer))]
@@ -7,27 +7,67 @@ public class SpawnGrenade : MonoBehaviour
     private Camera mainCamera;
     private LineRenderer lineRenderer;
 
+    // グレネードのプレハブ
+    // Grenade prefab
+    // 手榴弹的预制体
     [SerializeField] private GameObject grenadePrefab;
+
+    // 弾道のポイント数
+    // Number of trajectory points
+    // 弹道的轨迹点数量
     [SerializeField] private int trajectoryPoints = 30;
+
+    // 弾道描画の時間ステップ
+    // Time step for trajectory calculation
+    // 弹道计算的时间步长
     [SerializeField] private float timeStep = 0.1f;
+
+    // 投擲の飛行時間
+    // Flight time of the grenade
+    // 手榴弹的飞行时间
     [SerializeField] private float flightTime = 1.5f;
 
     [Header("Range Settings")]
+    // 最大投擲距離
+    // Maximum throwing range
+    // 最大投掷范围
     [SerializeField] private float maxThrowRange = 15f;
+
+    // 射程インジケーター
+    // Range indicator canvas
+    // 范围指示器
     [SerializeField] private GameObject rangeIndicatorCanvas;
+
+    // ターゲット層
+    // Target layer
+    // 目标检测层
     [SerializeField] private LayerMask targetLayer;
 
-    private bool isAiming = false;
+    // 照準中かどうか
+    // Whether the player is aiming
+    // 是否处于瞄准状态
+    public bool isAiming = false;
+
     private Vector3 cachedVelocity;
 
+    // ターゲットリスト
+    // List of targets
+    // 目标列表
     private List<Transform> targetList = new List<Transform>();
+
     private int currentTargetIndex = 0;
     private Transform currentTarget;
 
+    // ロックオンモード使用中か
+    // Whether lock-on mode is active
+    // 是否使用锁定模式
     private bool useLockOn = false;
 
     private void Start()
     {
+        // カメラとLineRendererの初期化
+        // Initialize camera and LineRenderer
+        // 初始化主摄像机和LineRenderer
         mainCamera = Camera.main;
         lineRenderer = GetComponent<LineRenderer>();
         lineRenderer.positionCount = trajectoryPoints;
@@ -47,10 +87,11 @@ public class SpawnGrenade : MonoBehaviour
 
         if (useLockOn)
         {
-            // 手柄模式：只在有敌人时显示
+            // 手柄モード：敵がいる時だけ表示
+            // Gamepad mode: Only show when there are enemies
+            // 手柄模式：只有有敌人时显示
             if (targetList.Count == 0)
             {
-                // 没敌人，关闭线条，什么也不显示
                 currentTarget = null;
                 lineRenderer.enabled = false;
                 return;
@@ -61,7 +102,6 @@ public class SpawnGrenade : MonoBehaviour
                 float distance = Vector3.Distance(transform.position, currentTarget.position);
                 if (distance > maxThrowRange)
                 {
-                    // 目标超出范围，不显示线条
                     currentTarget = null;
                     lineRenderer.enabled = false;
                     return;
@@ -71,7 +111,9 @@ public class SpawnGrenade : MonoBehaviour
         }
         else
         {
-            // 鼠标模式，显示鼠标位置轨迹
+            // マウスモード：マウス位置を使う
+            // Mouse mode: Use mouse hit position
+            // 鼠标模式：显示鼠标位置轨迹
             if (!GetMouseTarget(out Vector3 mouseHit))
             {
                 lineRenderer.enabled = false;
@@ -85,9 +127,11 @@ public class SpawnGrenade : MonoBehaviour
         lineRenderer.enabled = true;
     }
 
-
     public void StartAiming(bool lockOnMode)
     {
+        // 照準開始
+        // Start aiming
+        // 开始瞄准
         isAiming = true;
         useLockOn = lockOnMode;
 
@@ -112,11 +156,15 @@ public class SpawnGrenade : MonoBehaviour
 
     public void CancelAimingAndThrow()
     {
+        // 照準解除と投擲
+        // Cancel aiming and throw
+        // 取消瞄准并投掷
+        if (!isAiming) return;
+
         isAiming = false;
         lineRenderer.enabled = false;
         rangeIndicatorCanvas.SetActive(false);
 
-        // 投掷条件判断
         if (useLockOn)
         {
             if (currentTarget == null ||
@@ -126,34 +174,38 @@ public class SpawnGrenade : MonoBehaviour
                 return;
             }
         }
-        else
-        {
-            // 如果非锁定，cachedVelocity是根据鼠标点算的，理论上没问题
-        }
 
         ThrowGrenade(cachedVelocity);
     }
 
     public void LockToNextTarget()
     {
+        // 次のターゲットにロックオン
+        // Lock on to the next target
+        // 切换到下一个目标
         if (targetList.Count == 0) return;
-
         currentTargetIndex = (currentTargetIndex + 1) % targetList.Count;
         currentTarget = targetList[currentTargetIndex];
     }
 
     private void ThrowGrenade(Vector3 velocity)
     {
+        // グレネードを生成し投擲
+        // Instantiate and throw grenade
+        // 生成并投掷手榴弹
         GameObject grenade = Instantiate(grenadePrefab, transform.position, Quaternion.identity);
         Rigidbody rb = grenade.GetComponent<Rigidbody>();
         if (rb != null)
         {
-            rb.linearVelocity = velocity;  // 这里改成rb.velocity，不是linearVelocity
+            rb.linearVelocity = velocity;  // 修正：使用rb.velocity
         }
     }
 
     private bool GetMouseTarget(out Vector3 hitPoint)
     {
+        // マウス位置を地面上の点に変換
+        // Get mouse target point on ground
+        // 获取鼠标指向的地面位置
         if (mainCamera == null)
         {
             hitPoint = Vector3.zero;
@@ -183,12 +235,15 @@ public class SpawnGrenade : MonoBehaviour
 
     private void FindTargetsInRange()
     {
+        // 射程内のターゲットを探す
+        // Find targets within throw range
+        // 搜索投掷范围内的目标
         Collider[] hits = Physics.OverlapSphere(transform.position, maxThrowRange, targetLayer);
         targetList.Clear();
 
         foreach (Collider hit in hits)
         {
-            if (hit.transform.root != transform.root) // 避免锁定自己
+            if (hit.transform.root != transform.root) // 自分を除外
             {
                 targetList.Add(hit.transform);
             }
@@ -201,6 +256,9 @@ public class SpawnGrenade : MonoBehaviour
 
     private Vector3 CalculateLaunchVelocity(Vector3 startPoint, Vector3 targetPoint, float time)
     {
+        // 投擲速度を計算
+        // Calculate launch velocity
+        // 计算投掷速度
         Vector3 displacement = targetPoint - startPoint;
         Vector3 horizontal = new Vector3(displacement.x, 0, displacement.z);
         float y = displacement.y;
@@ -214,11 +272,25 @@ public class SpawnGrenade : MonoBehaviour
 
     private void ShowTrajectory(Vector3 startPos, Vector3 startVelocity)
     {
+        // 弾道をLineRendererで描画
+        // Draw trajectory with LineRenderer
+        // 使用LineRenderer绘制弹道
         for (int i = 0; i < trajectoryPoints; i++)
         {
             float t = i * timeStep;
             Vector3 point = startPos + startVelocity * t + 0.5f * Physics.gravity * t * t;
             lineRenderer.SetPosition(i, point);
         }
+    }
+
+    public void CancelAimingOnly()
+    {
+        // 照準のみキャンセル
+        // Cancel aiming only
+        // 仅取消瞄准
+        isAiming = false;
+        lineRenderer.enabled = false;
+        rangeIndicatorCanvas.SetActive(false);
+        currentTarget = null;
     }
 }
