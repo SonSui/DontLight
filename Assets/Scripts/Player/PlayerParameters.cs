@@ -6,7 +6,7 @@ public class PlayerParameters : MonoBehaviour
     // 懐中電灯オブジェクト（ON/OFF制御用）
     // Flashlight GameObject to be toggled on/off
     // 手电筒的游戏对象，用于开关控制
-    [SerializeField] private GameObject flashlight;
+    [SerializeField] private Flashlight flashlight;
 
     // 懐中電灯の最大バッテリー容量（秒数として使用）
     // Maximum flashlight battery capacity (used as duration in seconds)
@@ -35,7 +35,7 @@ public class PlayerParameters : MonoBehaviour
 
     private void Start()
     {
-        flashlight.SetActive(true);
+        flashlight.ToggleFlashlight(true);
         flashlightIsOn = true;
         StartCoroutine(DisableAfterTime());
     }
@@ -67,7 +67,7 @@ public class PlayerParameters : MonoBehaviour
             {
                 currentBattery = flashlightBattery;
                 flashlightIsOn = true;
-                flashlight.SetActive(true);
+                flashlight.ToggleFlashlight(true);
 
                 // 一定時間後に自動でOFFにする処理を開始
                 // Start coroutine to auto-disable flashlight after time
@@ -90,7 +90,7 @@ public class PlayerParameters : MonoBehaviour
         // 消灯処理
         // Turn off flashlight and reset state
         // 关闭手电筒并重置状态
-        flashlight.SetActive(false);
+        flashlight.ToggleFlashlight(false);
         flashlightIsOn = false;
         currentBattery = 0f;
     }

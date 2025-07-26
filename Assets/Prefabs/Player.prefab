@@ -255,7 +255,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0c4337315f0d26d4d8c51557619e755c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  flashlight: {fileID: 6103508283073585551}
+  flashlight: {fileID: 3964696288890778498}
   flashlightBattery: 10
   chargingValue: 1.5
 --- !u!1 &1071878470493906596
@@ -1653,11 +1653,17 @@ PrefabInstance:
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 6357cb7f47ac52d40a9b90d2170ef365, type: 3}
---- !u!1 &6103508283073585551 stripped
-GameObject:
-  m_CorrespondingSourceObject: {fileID: 8693933339924145457, guid: 6357cb7f47ac52d40a9b90d2170ef365, type: 3}
+--- !u!114 &3964696288890778498 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 1951857962167252796, guid: 6357cb7f47ac52d40a9b90d2170ef365, type: 3}
   m_PrefabInstance: {fileID: 3175893421271008446}
   m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 02d407feecd36b246b0c49064ca8e31f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!4 &6917481604809046837 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 8353296479458885515, guid: 6357cb7f47ac52d40a9b90d2170ef365, type: 3}
