@@ -193,16 +193,14 @@ public class GameManager : MonoBehaviour
             case GameState.LocalPreparation:
                 if (CurrentGameState == GameState.MainMenu)
                 {
-                    _previousGameState = CurrentGameState;
-                    CurrentGameState = GameState.LocalPreparation;
-
                     if (_sceneState.ContainsKey(CurrentGameState))
                     {
+                        _previousGameState = CurrentGameState;
+                        CurrentGameState = GameState.LocalPreparation;
                         SceneTransitionManager.Instance.LoadScene(_sceneState[CurrentGameState]);
                     }
                     else
                     {
-                        CurrentGameState = _previousGameState; // シーンが設定されていない場合は前の状態に戻す
                         Debug.LogError("LocalPreparationのシーンが設定されていません。");
                     }
                 }
@@ -215,15 +213,14 @@ public class GameManager : MonoBehaviour
             case GameState.LocalPlaying:
                 if (CurrentGameState == GameState.LocalPreparation && joinedPlayers.Count >= 2)
                 {
-                    _previousGameState = CurrentGameState;
-                    CurrentGameState = GameState.LocalPlaying;
                     if (_sceneState.ContainsKey(CurrentGameState))
                     {
+                        _previousGameState = CurrentGameState;
+                        CurrentGameState = GameState.LocalPlaying;
                         SceneTransitionManager.Instance.LoadScene(_sceneState[CurrentGameState]);
                     }
                     else
                     {
-                        CurrentGameState = _previousGameState; // シーンが設定されていない場合は前の状態に戻す
                         Debug.LogError("LocalPlayingのシーンが設定されていません。");
                     }
                 }
@@ -237,16 +234,14 @@ public class GameManager : MonoBehaviour
             case GameState.OnlinePreparation:
                 if (CurrentGameState == GameState.MainMenu)
                 {
-                    _previousGameState = CurrentGameState;
-                    CurrentGameState = GameState.OnlinePreparation;
-
                     if (_sceneState.ContainsKey(CurrentGameState))
                     {
+                        _previousGameState = CurrentGameState;
+                        CurrentGameState = GameState.OnlinePreparation;
                         SceneTransitionManager.Instance.LoadScene(_sceneState[CurrentGameState]);
                     }
                     else
                     {
-                        CurrentGameState = _previousGameState; // シーンが設定されていない場合は前の状態に戻す
                         Debug.LogError("OnlinePreparationのシーンが設定されていません。");
                     }
                 }
