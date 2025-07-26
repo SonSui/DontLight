@@ -11,6 +11,7 @@ public class PlayerMovement : MonoBehaviour
     private InputAction lookAction;
     private InputAction throwAction;
     private InputAction switchTargetAction;
+    private InputAction cancelThrowingAction;
 
     private Vector2 moveInput;
     private Vector2 lookInput;
@@ -33,10 +34,12 @@ public class PlayerMovement : MonoBehaviour
         lookAction = playerInput.actions.FindAction("Look");
         throwAction = playerInput.actions.FindAction("Throw");
         switchTargetAction = playerInput.actions.FindAction("SwitchTarget");
+        cancelThrowingAction = playerInput.actions.FindAction("CancelThrowing");
 
         throwAction.started += OnThrowStarted;
         throwAction.canceled += OnThrowCanceled;
         switchTargetAction.performed += OnSwitchTarget;
+        cancelThrowingAction.performed += OnThrowCanceledManually;
 
         playerInput.onControlsChanged += OnDeviceChange;
     }
@@ -150,6 +153,9 @@ public class PlayerMovement : MonoBehaviour
 
     private void OnThrowCanceled(InputAction.CallbackContext ctx)
     {
+        if (!grenadeThrower.isAiming)
+            return;
+
         grenadeThrower.CancelAimingAndThrow();
     }
 
@@ -159,5 +165,10 @@ public class PlayerMovement : MonoBehaviour
         {
             playerInput.onControlsChanged -= OnDeviceChange;
         }
+    }
+
+    private void OnThrowCanceledManually(InputAction.CallbackContext ctx)
+    {
+        grenadeThrower.CancelAimingOnly();
     }
 }

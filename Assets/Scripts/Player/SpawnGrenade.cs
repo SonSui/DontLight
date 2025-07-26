@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using UnityEngine;
 
 [RequireComponent(typeof(LineRenderer))]
@@ -17,7 +17,7 @@ public class SpawnGrenade : MonoBehaviour
     [SerializeField] private GameObject rangeIndicatorCanvas;
     [SerializeField] private LayerMask targetLayer;
 
-    private bool isAiming = false;
+    public bool isAiming = false;
     private Vector3 cachedVelocity;
 
     private List<Transform> targetList = new List<Transform>();
@@ -112,6 +112,8 @@ public class SpawnGrenade : MonoBehaviour
 
     public void CancelAimingAndThrow()
     {
+        if (!isAiming) return; // 加这一行确保不会误投掷
+
         isAiming = false;
         lineRenderer.enabled = false;
         rangeIndicatorCanvas.SetActive(false);
@@ -220,5 +222,13 @@ public class SpawnGrenade : MonoBehaviour
             Vector3 point = startPos + startVelocity * t + 0.5f * Physics.gravity * t * t;
             lineRenderer.SetPosition(i, point);
         }
+    }
+
+    public void CancelAimingOnly()
+    {
+        isAiming = false;
+        lineRenderer.enabled = false;
+        rangeIndicatorCanvas.SetActive(false);
+        currentTarget = null;
     }
 }
