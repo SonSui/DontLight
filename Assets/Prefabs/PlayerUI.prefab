@@ -796,8 +796,9 @@ MonoBehaviour:
   effect: {fileID: 7527916451285438516}
   frame: {fileID: 7572796230690376843}
   decorate: {fileID: 8021841360018978915}
-  fullColor: {r: 1, g: 1, b: 1, a: 1}
+  fullColor: {r: 1, g: 1, b: 0, a: 1}
   emptyColor: {r: 1, g: 0, b: 0, a: 1}
+  normalColor: {r: 1, g: 1, b: 1, a: 1}
   fillDuration: 0.1
 --- !u!1 &8021841360018978915
 GameObject:
