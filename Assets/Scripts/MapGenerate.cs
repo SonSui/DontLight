@@ -66,16 +66,20 @@ public class MapGenerator : MonoBehaviour
 
                 GameObject prefab = TilePrefabs[tile - 1];
                 Vector3 pos = new Vector3(
-                    mapOrigin.x + x - 10f,
-                    mapOrigin.y - 0.7f, // オブジェクトよりちょっと下
-                    mapOrigin.z - z
+                    mapOrigin.x + x * 3f - 10f,//位置もスケールに合わせて調整
+                    0f,
+                    mapOrigin.z - z * 3f + 3f
                 );
+
                 GameObject obj = Instantiate(prefab, pos, prefab.transform.rotation);
+
+                //Yはそのまま、高さ維持
+                obj.transform.localScale = new Vector3(3f, 1f, 3f);
+
                 obj.transform.parent = mapParent.transform;
             }
         }
     }
-
     void GenerateObjectMap()
     {
         for (int z = 0; z < mapData.GetLength(0); z++)
@@ -99,10 +103,10 @@ public class MapGenerator : MonoBehaviour
                 );
 
                 Vector3 offset = Vector3.zero;
-                if (tile == 3) offset = new Vector3(0.4f, 0f, 0f);
-                if (tile == 4) offset = new Vector3(-0.2f, 0f, 0f);
+                //if (tile == 3) offset = new Vector3(0.4f, 0f, 0f);
+                //if (tile == 4) offset = new Vector3(-0.2f, 0f, 0f);
                 if (tile == 5) offset = new Vector3(-0.2f, 0f, 0.2f);
-                if (tile == 6) offset = new Vector3(0.2f, 0f, 0.4f);
+                if (tile == 6) offset = new Vector3(0.1f, 0f, 0.4f);
 
                 GameObject obj = Instantiate(prefab, basePos + offset, prefab.transform.rotation);
                 obj.transform.parent = mapParent.transform;
