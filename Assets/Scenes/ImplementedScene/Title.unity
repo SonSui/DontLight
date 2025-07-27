@@ -4676,6 +4676,7 @@ GameObject:
   - component: {fileID: 2068062699}
   - component: {fileID: 2068062698}
   - component: {fileID: 2068062697}
+  - component: {fileID: 2068062702}
   m_Layer: 5
   m_Name: SceneTransitionCanvas
   m_TagString: Untagged
@@ -4780,6 +4781,26 @@ RectTransform:
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0, y: 0}
+--- !u!114 &2068062702
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2068062696}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: df8c5a9358caecf4b8c9a98b9ded504d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  normalFrames:
+  - {fileID: 2800000, guid: 1171f8969e0b0194abb5d95390c5d8ea, type: 3}
+  - {fileID: 2800000, guid: 13f2ac59cde1c5b498278ac967276e31, type: 3}
+  - {fileID: 2800000, guid: d9ba9f06e7b8e634dbb67839dad543f8, type: 3}
+  - {fileID: 2800000, guid: e63d1e23e52e37341b0334638b469976, type: 3}
+  hotSpot: {x: 0, y: 0}
+  cursorMode: 0
+  animationSpeed: 0.2
 --- !u!4 &2102537692 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 5132127028417993906, guid: f5ff80f5feefb2447a0fb21ff18836aa, type: 3}
