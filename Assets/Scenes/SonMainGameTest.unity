@@ -24,7 +24,7 @@ RenderSettings:
   m_AmbientEquatorColor: {r: 0.114, g: 0.125, b: 0.133, a: 1}
   m_AmbientGroundColor: {r: 0.047, g: 0.043, b: 0.035, a: 1}
   m_AmbientIntensity: 1
-  m_AmbientMode: 1
+  m_AmbientMode: 0
   m_SubtractiveShadowColor: {r: 0, g: 0, b: 0, a: 1}
   m_SkyboxMaterial: {fileID: 2100000, guid: 5cb41aefde75aab4398926231941ac6b, type: 2}
   m_HaloStrength: 0.5
@@ -163,6 +163,16 @@ MonoBehaviour:
   - {r: 0.42745098, g: 0.42745098, b: 0.9764706, a: 1}
   - {r: 0.41960785, g: 1, b: 0.41960785, a: 1}
   - {r: 1, g: 0.92156863, b: 0.015686275, a: 1}
+  maxBulbCount: 32
+  winner:
+    playerIndex: -1
+    playerName: 
+    playerColor: {r: 0, g: 0, b: 0, a: 0}
+    bulbCooldown: 5
+    maxHP: 100
+    battery: 10
+    input: {fileID: 0}
+    controlScheme: 
 --- !u!4 &22127802
 Transform:
   m_ObjectHideFlags: 0
