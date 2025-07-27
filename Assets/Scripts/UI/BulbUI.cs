@@ -61,6 +61,7 @@ public class BulbUI : MonoBehaviour
             bulbImage.sprite = onSprite;
             currentLength = maxLength; // 点灯時は最大長さに設定
             ring.fillAmount = 1f; // リングの表示を最大にする
+            GetComponent<AudioSource>()?.Play(); // 点灯音を再生
         }
         else
         {

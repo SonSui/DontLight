@@ -106,7 +106,7 @@ public class PlayerManager : MonoBehaviour
                 {
                     Debug.Log($"勝者：プレイヤー{lastAliveIndex}");
                     GameEvents.PlayerEvents.OnWinnerSet?.Invoke(kvp.Value);
-                    kvp.Key.GetComponent<PlayerTestSon>().SetWinnder();// 勝利フラグを設定
+                    kvp.Key.GetComponent<PlayerTestSon>().SetWinner();// 勝利フラグを設定
                     break;
                 }
             }

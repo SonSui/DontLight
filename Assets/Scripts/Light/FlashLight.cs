@@ -113,25 +113,25 @@ public class Flashlight : MonoBehaviour
     public void ToggleFlashlight(bool toggle)
     {
         // 通常のON/OFF切替、強制消灯中なら中止
-        if (isShuttingDown&&toggle)
+        if (isShuttingDown && toggle)
         {
             CancelShutdown();
         }
-        else
+
+        isEnabled = toggle;
+        if (flashlightLight != null)
         {
-            isEnabled = toggle;
-            if (flashlightLight != null)
-            {
-                flashlightLight.enabled = isEnabled;
-            }
-            if (isDebug) Debug.Log($"[FLASHLIGHT] {name} flashlight is now {(isEnabled ? "enabled" : "disabled")}.");
+            flashlightLight.enabled = isEnabled;
         }
+        if (isDebug) Debug.Log($"[FLASHLIGHT] {name} flashlight is now {(isEnabled ? "enabled" : "disabled")}.");
+        GetComponent<AudioSource>()?.Play(); // ON/OFF時に音を鳴らす（AudioSourceがあれば）
     }
     /// <summary>
     /// 強制的に懐中電灯を1.5秒かけて消灯（バッテリー切れ時など）
     /// </summary>
     public void ForceShutdown()
     {
+        if (!isEnabled) return;
         if (isShuttingDown || flashlightLight == null) return;
 
         isShuttingDown = true;
