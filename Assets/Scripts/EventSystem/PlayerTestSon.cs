@@ -6,7 +6,7 @@ public class PlayerTestSon : MonoBehaviour
     [Header("プレイヤーの基本設定")]
 
     [Header("体力設定")]
-    private float currentHP;
+    private float currentHP =100f;
     private float originMaxHP = 100f; // 初期最大HP
     public float maxHP = 100f;
     public float HPRecoverCooldown = 1f; // HP回復のクールダウン時間
@@ -65,9 +65,6 @@ public class PlayerTestSon : MonoBehaviour
     }
     private void Start()
     {
-        currentHP = playerData.maxHP;
-        maxHP = playerData.maxHP;
-        originMaxHP = playerData.maxHP;
         flashlight.ToggleFlashlight(isFlashlightOn); // フラッシュライトの状態を設定
         if (isTest)
         {

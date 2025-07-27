@@ -60,7 +60,7 @@ public class RoomLANConfig : NetworkBehaviour
     {
         ConfigureTransportForHost();
         bool success = NetworkManager.Singleton.StartHost();
-        Debug.Log("¥Û¥¹¥È¤Ï" + port + "¤Ë×÷³É ×´‘B£º" + success);
+        Debug.Log("StartHost" + port + " " + success);
         if (success)
         {
             MovePlayerToSpawnPosition(NetworkManager.Singleton.LocalClientId, 0);
@@ -70,10 +70,10 @@ public class RoomLANConfig : NetworkBehaviour
     public void StartClient()
     {
         string ip = StaticEvents.hostIP;
-        if (string.IsNullOrEmpty(ip))¡¡return;
+        if (string.IsNullOrEmpty(ip))return;
         ConfigureTransportForClient(ip);
         bool success = NetworkManager.Singleton.StartClient();
-        Debug.Log($"{ip}:{port}¤Ë½Ó¾A ×´‘B£º" + success);
+        Debug.Log($"{ip}:{port}" + success);
     }
 
     private void OnClientConnected(ulong clientId)
@@ -88,7 +88,7 @@ public class RoomLANConfig : NetworkBehaviour
             }
             else
             {
-                Debug.LogWarning("¥ë©`¥à¤Ïœº†T¤È¤Ê¤ê¡¢¥í¥Ó©`¤Ë‘ø¤ë");
+                Debug.LogWarning("Spawn index out of range. Not moving player.");
                 SceneTransitionManager.Instance.LoadScene("LobbyScene");
             }
         }
