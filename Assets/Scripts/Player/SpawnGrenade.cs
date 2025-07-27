@@ -37,6 +37,7 @@ public class SpawnGrenade : MonoBehaviour
     // Range indicator canvas
     // 范围指示器
     [SerializeField] private GameObject rangeIndicatorCanvas;
+    [SerializeField] private GameObject damageRangeIndicatorCanvas;
 
     // ターゲット層
     // Target layer
@@ -73,6 +74,7 @@ public class SpawnGrenade : MonoBehaviour
         lineRenderer.positionCount = trajectoryPoints;
         lineRenderer.enabled = false;
         rangeIndicatorCanvas.SetActive(false);
+        damageRangeIndicatorCanvas.SetActive(false);
     }
 
     private void Update()
@@ -117,14 +119,20 @@ public class SpawnGrenade : MonoBehaviour
             if (!GetMouseTarget(out Vector3 mouseHit))
             {
                 lineRenderer.enabled = false;
+                damageRangeIndicatorCanvas.SetActive(false);
                 return;
             }
             targetPoint = mouseHit;
+            damageRangeIndicatorCanvas.SetActive(true);
+            damageRangeIndicatorCanvas.transform.position = targetPoint;
+            
         }
 
         cachedVelocity = CalculateLaunchVelocity(transform.position, targetPoint, flightTime);
         ShowTrajectory(transform.position, cachedVelocity);
         lineRenderer.enabled = true;
+
+        damageRangeIndicatorCanvas.transform.rotation = Quaternion.Euler(0f, 0f, 0f);
     }
 
     public void StartAiming(bool lockOnMode)
@@ -164,6 +172,7 @@ public class SpawnGrenade : MonoBehaviour
         isAiming = false;
         lineRenderer.enabled = false;
         rangeIndicatorCanvas.SetActive(false);
+        damageRangeIndicatorCanvas.SetActive(false);
 
         if (useLockOn)
         {
@@ -291,6 +300,7 @@ public class SpawnGrenade : MonoBehaviour
         isAiming = false;
         lineRenderer.enabled = false;
         rangeIndicatorCanvas.SetActive(false);
+        damageRangeIndicatorCanvas.SetActive(false);
         currentTarget = null;
     }
 }
