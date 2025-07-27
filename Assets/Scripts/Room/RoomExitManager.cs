@@ -9,6 +9,7 @@ public class RoomExitManager : NetworkBehaviour
         if (!IsHost && NetworkManager.Singleton.IsConnectedClient)
         {
             Debug.Log("ホストコマンドを受信: ロビーに戻る");
+            StaticEvents.Dissolution = true;
             NetworkManager.Singleton.Shutdown();
             SceneTransitionManager.Instance.LoadScene(sceneName);
         }

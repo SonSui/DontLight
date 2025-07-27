@@ -7,8 +7,12 @@ public class LobbyUIManager : MonoBehaviour
     [Header("UI")]
     public Button createButton;
     public Button backButton;
-    public Button closeButton;
-    public GameObject popUp;
+    public Button closeFullRoomButton;
+    public Button closeDisbandRoomButton;
+
+    [Header("GameObject")]
+    public GameObject fullRoom;
+    public GameObject disbandRoom;
 
     private float duration = 0.3f;
 
@@ -16,7 +20,13 @@ public class LobbyUIManager : MonoBehaviour
     {
         createButton.onClick.AddListener(CreateRoom);
         backButton.onClick.AddListener(BackToTitle);
-        closeButton.onClick.AddListener(ClosePop);
+        closeFullRoomButton.onClick.AddListener(() => ClosePop(fullRoom));
+        closeDisbandRoomButton.onClick.AddListener(() => ClosePop(disbandRoom));
+
+        if (StaticEvents.Dissolution) {
+            OpenPop(disbandRoom);
+            StaticEvents.Dissolution = false;
+        }
     }
 
     public void CreateRoom()
@@ -31,12 +41,16 @@ public class LobbyUIManager : MonoBehaviour
         SceneTransitionManager.Instance.LoadScene("Title");
     }
 
-    public void OpenPop()
-    {
-        StartCoroutine(FadeIn());
+    public void OpenFullRoomPop() {
+        OpenPop(fullRoom);
     }
 
-    IEnumerator FadeIn()
+    public void OpenPop(GameObject popUp)
+    {
+        StartCoroutine(FadeIn(popUp));
+    }
+
+    IEnumerator FadeIn(GameObject popUp)
     {
         popUp.SetActive(true);
         CanvasGroup canvasGroup = popUp.GetComponent<CanvasGroup>();
@@ -56,12 +70,12 @@ public class LobbyUIManager : MonoBehaviour
         canvasGroup.alpha = 1;
     }
 
-    public void ClosePop()
+    public void ClosePop(GameObject popUp)
     {
-        StartCoroutine(FadeOut());
+        StartCoroutine(FadeOut(popUp));
     }
 
-    IEnumerator FadeOut()
+    IEnumerator FadeOut(GameObject popUp)
     {
         CanvasGroup canvasGroup = popUp.GetComponent<CanvasGroup>();
         if (canvasGroup == null)

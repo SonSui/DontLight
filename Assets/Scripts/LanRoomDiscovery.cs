@@ -17,7 +17,7 @@ public class LanRoomDiscovery : MonoBehaviour
     private UdpClient udpReceiver;
     private long nowTimer;
     private float roomRefresh = 1000f;
-    private float roomTimeout = 1500f;
+    private float roomTimeout = 1800f;
     private bool isListening = true;
     private Dictionary<string, Dictionary<string, string>> roomDetail = new Dictionary<string, Dictionary<string, string>>();
 
@@ -52,10 +52,12 @@ public class LanRoomDiscovery : MonoBehaviour
                 if (detail.Key == "receiveTime")
                 {
                     long receiveTime = long.Parse(detail.Value);
-                    if (nowTimer - receiveTime > roomTimeout)
-                    {
-                        keysToRemove.Add(roomIP);
-                    } 
+                    if (nowTimer - receiveTime > roomTimeout) keysToRemove.Add(roomIP);
+                }
+                if (detail.Key == "playerNum")
+                {
+                    int playerNum = int.Parse(detail.Value);
+                    if (playerNum == 0) keysToRemove.Add(roomIP);
                 }
             }
         }
@@ -144,7 +146,6 @@ public class LanRoomDiscovery : MonoBehaviour
             Dictionary<string, string> details = room.Value;
             if (eleNum % 2 == 0)
                 newPanel = Instantiate(listPanelPrefab, contentParent);
-
             if (newPanel != null)
             {
                 Transform firstChild = newPanel.transform.GetChild(eleNum % 2);
@@ -179,8 +180,6 @@ public class LanRoomDiscovery : MonoBehaviour
                     if (detail.Key == "playerNum")
                     {
                         activeCount = int.Parse(detail.Value);
-                        activeCount = 4;
-                        Debug.Log("activeCount :" + activeCount);
                         for (int i = 0; i < 4; i++)
                         {
                             Transform roomCheck = firstChild.GetChild(i + 9);
@@ -188,7 +187,6 @@ public class LanRoomDiscovery : MonoBehaviour
                         }
                         if (activeCount == 4) canJoin = false;
                     }
-                    
                 }
                 Transform join = firstChild.GetChild(13);
                 JoinRoomButton joinButton = join.GetComponent<JoinRoomButton>();
@@ -197,8 +195,7 @@ public class LanRoomDiscovery : MonoBehaviour
                     Image buttonImage = joinButton.GetComponent<Image>();
                     if (canJoin) buttonImage.sprite = greenSprite;
                     else buttonImage.sprite = redSprite;
-                    joinButton.roomIP = roomIP;
-                    joinButton.playerNum = activeCount;
+                    joinButton.SetInformation(roomIP, activeCount);
                 }
                 firstChild.gameObject.SetActive(true);
             }

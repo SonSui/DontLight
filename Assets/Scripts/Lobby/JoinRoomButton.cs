@@ -1,12 +1,10 @@
 ﻿using UnityEngine;
 using UnityEngine.UI;
-using System.Collections;
 
 public class JoinRoomButton : MonoBehaviour
 {
-    public string roomIP;
-    public int playerNum;
-
+    private string roomIP;
+    private int playerNum;
     private Button button;
 
     void Awake()
@@ -28,7 +26,12 @@ public class JoinRoomButton : MonoBehaviour
         }
         else {
             LobbyUIManager lobbyUIManager = FindFirstObjectByType<LobbyUIManager>();
-            if(lobbyUIManager != null) lobbyUIManager.OpenPop();
+            if(lobbyUIManager != null) lobbyUIManager.OpenFullRoomPop();
         }
+    }
+
+    public void SetInformation(string roomIP, int playerNum) {
+        this.roomIP = roomIP;
+        this.playerNum = playerNum;
     }
 }
