@@ -114,4 +114,12 @@ public class RoomLANConfig : NetworkBehaviour
             }
         }
     }
+
+    private void OnDestroy()
+    {
+        if (NetworkManager.Singleton != null)
+        {
+            NetworkManager.Singleton.OnClientConnectedCallback -= OnClientConnected;
+        }
+    }
 }

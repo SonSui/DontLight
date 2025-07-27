@@ -180,7 +180,6 @@ public class LanRoomDiscovery : MonoBehaviour
                     if (detail.Key == "playerNum")
                     {
                         activeCount = int.Parse(detail.Value);
-                        activeCount = 4;
                         for (int i = 0; i < 4; i++)
                         {
                             Transform roomCheck = firstChild.GetChild(i + 9);
