@@ -149,6 +149,7 @@ public class LanRoomDiscovery : MonoBehaviour
             {
                 Transform firstChild = newPanel.transform.GetChild(eleNum % 2);
                 bool canJoin = true;
+                int activeCount = 0;
                 foreach (KeyValuePair<string, string> detail in details)
                 {
                     if (detail.Key == "roomName")
@@ -177,8 +178,8 @@ public class LanRoomDiscovery : MonoBehaviour
                     }
                     if (detail.Key == "playerNum")
                     {
-                        int activeCount = int.Parse(detail.Value);
-                        //activeCount = 4;
+                        activeCount = int.Parse(detail.Value);
+                        activeCount = 4;
                         Debug.Log("activeCount :" + activeCount);
                         for (int i = 0; i < 4; i++)
                         {
@@ -197,6 +198,7 @@ public class LanRoomDiscovery : MonoBehaviour
                     if (canJoin) buttonImage.sprite = greenSprite;
                     else buttonImage.sprite = redSprite;
                     joinButton.roomIP = roomIP;
+                    joinButton.playerNum = activeCount;
                 }
                 firstChild.gameObject.SetActive(true);
             }

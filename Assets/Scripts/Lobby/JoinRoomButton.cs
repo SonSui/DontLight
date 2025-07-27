@@ -1,9 +1,11 @@
 ﻿using UnityEngine;
 using UnityEngine.UI;
+using System.Collections;
 
 public class JoinRoomButton : MonoBehaviour
 {
     public string roomIP;
+    public int playerNum;
 
     private Button button;
 
@@ -18,8 +20,15 @@ public class JoinRoomButton : MonoBehaviour
 
     public void JoinRoom()
     {
-        StaticEvents.playerStat = "Client";
-        StaticEvents.hostIP = roomIP;
-        SceneTransitionManager.Instance.LoadScene("RoomScene");
+        if (playerNum < 4)
+        {
+            StaticEvents.playerStat = "Client";
+            StaticEvents.hostIP = roomIP;
+            SceneTransitionManager.Instance.LoadScene("RoomScene");
+        }
+        else {
+            LobbyUIManager lobbyUIManager = FindFirstObjectByType<LobbyUIManager>();
+            if(lobbyUIManager != null) lobbyUIManager.OpenPop();
+        }
     }
 }
