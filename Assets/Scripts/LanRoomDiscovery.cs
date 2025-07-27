@@ -4,18 +4,20 @@ using System.Net.Sockets;
 using System.Text;
 using UnityEngine;
 using UnityEngine.UI;
-using System.Collections.Generic;
 using System.Collections;
+using System.Collections.Generic;
 
 public class LanRoomDiscovery : MonoBehaviour
 {
     public GameObject listPanelPrefab;
     public GameObject NoPeople;
     public Transform contentParent;
+    public Sprite greenSprite;
+    public Sprite redSprite;
     private UdpClient udpReceiver;
     private long nowTimer;
-    private float roomRefresh = 1f;
-    private float roomTimeout = 1200f;
+    private float roomRefresh = 1000f;
+    private float roomTimeout = 1500f;
     private bool isListening = true;
     private Dictionary<string, Dictionary<string, string>> roomDetail = new Dictionary<string, Dictionary<string, string>>();
 
@@ -27,18 +29,17 @@ public class LanRoomDiscovery : MonoBehaviour
             udpReceiver.EnableBroadcast = true;
             udpReceiver.BeginReceive(OnReceive, null);
             isListening = true;
-            Debug.Log("🎧 ロビーはルームから放送の監視を始めます…");
+            Debug.Log("🎧 ロビーはルームから放送情報の監視を開始…");
         }
         catch (Exception ex)
         {
-            Debug.LogError("❌ 監視を開始できませんでした: " + ex.Message);
+            Debug.LogError("❌ 監視の開始失敗: " + ex.Message);
         }
         StartCoroutine(RepeatFillinList());
     }
 
     void Update()
     {
-        // 清理超时未响应的房间
         if (roomDetail.Count == 0) return;
         nowTimer = GetCurrentUnixTimestampMilliseconds();
         List<string> keysToRemove = new List<string>();
@@ -118,7 +119,7 @@ public class LanRoomDiscovery : MonoBehaviour
         {
             udpReceiver.Close();
             udpReceiver = null;
-            Debug.Log("🛑 ルームから放送の監視を停止します。");
+            Debug.Log("🛑 ルームから放送情報の監視停止");
         }
     }
 
@@ -127,7 +128,7 @@ public class LanRoomDiscovery : MonoBehaviour
         while (true)
         {
             FillinList();
-            yield return new WaitForSeconds(roomRefresh);
+            yield return new WaitForSeconds(roomRefresh / 1000f);
         }
     }
 
@@ -147,18 +148,19 @@ public class LanRoomDiscovery : MonoBehaviour
             if (newPanel != null)
             {
                 Transform firstChild = newPanel.transform.GetChild(eleNum % 2);
-                Transform roomName = firstChild.GetChild(0);
-                Text roomNameText = roomName.GetComponent<Text>();
-                Transform roomStat = firstChild.GetChild(3);
-                Text roomStatText = roomStat.GetComponent<Text>();
+                bool canJoin = true;
                 foreach (KeyValuePair<string, string> detail in details)
                 {
                     if (detail.Key == "roomName")
                     {
+                        Transform roomName = firstChild.GetChild(0);
+                        Text roomNameText = roomName.GetComponent<Text>();
                         if (roomNameText != null) roomNameText.text = detail.Value;
                     }
                     if (detail.Key == "roomStat")
                     {
+                        Transform roomStat = firstChild.GetChild(3);
+                        Text roomStatText = roomStat.GetComponent<Text>();
                         if (roomStatText != null)
                         {
                             if (detail.Value == "preparation")
@@ -173,14 +175,30 @@ public class LanRoomDiscovery : MonoBehaviour
                             }
                         }
                     }
-                    firstChild.gameObject.SetActive(true);
+                    if (detail.Key == "playerNum")
+                    {
+                        int activeCount = int.Parse(detail.Value);
+                        //activeCount = 4;
+                        Debug.Log("activeCount :" + activeCount);
+                        for (int i = 0; i < 4; i++)
+                        {
+                            Transform roomCheck = firstChild.GetChild(i + 9);
+                            roomCheck.gameObject.SetActive(i < activeCount);
+                        }
+                        if (activeCount == 4) canJoin = false;
+                    }
+                    
                 }
                 Transform join = firstChild.GetChild(13);
                 JoinRoomButton joinButton = join.GetComponent<JoinRoomButton>();
                 if (joinButton != null)
                 {
+                    Image buttonImage = joinButton.GetComponent<Image>();
+                    if (canJoin) buttonImage.sprite = greenSprite;
+                    else buttonImage.sprite = redSprite;
                     joinButton.roomIP = roomIP;
                 }
+                firstChild.gameObject.SetActive(true);
             }
             eleNum++;
         }

@@ -1,5 +1,3 @@
-using System.Net.Sockets;
-using System.Net;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -9,17 +7,10 @@ public class LobbyUIManager : MonoBehaviour
     public Button createButton;
     public Button backButton;
 
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
         createButton.onClick.AddListener(CreateRoom);
-        backButton.onClick.AddListener(BackToMenu);
-    }
-
-    // Update is called once per frame
-    void Update()
-    {
-
+        backButton.onClick.AddListener(BackToTitle);
     }
 
     public void CreateRoom()
@@ -29,8 +20,8 @@ public class LobbyUIManager : MonoBehaviour
         SceneTransitionManager.Instance.LoadScene("RoomScene");
     }
 
-    public void BackToMenu()
+    public void BackToTitle()
     {
-        SceneTransitionManager.Instance.LoadScene("RoomScene");
+        SceneTransitionManager.Instance.LoadScene("Title");
     }
 }

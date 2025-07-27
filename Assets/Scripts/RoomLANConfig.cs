@@ -14,10 +14,10 @@ public class RoomLANConfig : NetworkBehaviour
     [Header("Spawn Positions")]
     public List<Vector3> spawnPositions = new List<Vector3>()
     {
-        new Vector3(-5, 0, 0),  // 位置1
-        new Vector3(5, 0, 0),   // 位置2
-        new Vector3(0, 0, 5),   // 位置3
-        new Vector3(0, 0, -5)   // 位置4
+        new Vector3(-5, 0, 0),
+        new Vector3(5, 0, 0),
+        new Vector3(0, 0, 5),
+        new Vector3(0, 0, -5)
     };
 
     private string playerStat;
@@ -25,21 +25,10 @@ public class RoomLANConfig : NetworkBehaviour
     private void Start()
     {
         playerStat = StaticEvents.playerStat;
-        Debug.Log("RoomLANConfig playerStat : " + playerStat);
         if (playerStat == "Host") StartHost();
         else StartClient();
 
-        // 注册客户端连接事件
         NetworkManager.Singleton.OnClientConnectedCallback += OnClientConnected;
-    }
-
-    private void OnDestroy()
-    {
-        // 取消注册事件
-        if (NetworkManager.Singleton != null)
-        {
-            NetworkManager.Singleton.OnClientConnectedCallback -= OnClientConnected;
-        }
     }
 
     string GetLocalIPAddress()
@@ -71,9 +60,7 @@ public class RoomLANConfig : NetworkBehaviour
     {
         ConfigureTransportForHost();
         bool success = NetworkManager.Singleton.StartHost();
-        Debug.Log("Host started on 0.0.0.0:" + port + " " + success);
-
-        // 主机自动获取第一个位置
+        Debug.Log("ホストは" + port + "に作成 状態：" + success);
         if (success)
         {
             MovePlayerToSpawnPosition(NetworkManager.Singleton.LocalClientId, 0);
@@ -83,36 +70,26 @@ public class RoomLANConfig : NetworkBehaviour
     public void StartClient()
     {
         string ip = StaticEvents.hostIP;
-        if (string.IsNullOrEmpty(ip))
-        {
-            Debug.LogWarning("Please enter a valid IP address.");
-            return;
-        }
-
+        if (string.IsNullOrEmpty(ip))　return;
         ConfigureTransportForClient(ip);
         bool success = NetworkManager.Singleton.StartClient();
-        Debug.Log($"Connecting to {ip}:{port} " + success);
+        Debug.Log($"{ip}:{port}に接続 状態：" + success);
     }
 
     private void OnClientConnected(ulong clientId)
     {
         if (NetworkManager.Singleton.IsServer)
         {
-            // 服务器为每个连接的客户端分配位置
             int spawnIndex = NetworkManager.Singleton.ConnectedClients.Count - 1;
-
-            // 确保不超过预设的位置数量
             if (spawnIndex < spawnPositions.Count)
             {
-                // 在服务器上移动玩家
                 MovePlayerToSpawnPosition(clientId, spawnIndex);
-
-                // 通知客户端移动
                 MovePlayerClientRpc(clientId, spawnPositions[spawnIndex]);
             }
             else
             {
-                Debug.LogWarning("No more spawn positions available!");
+                Debug.LogWarning("ルームは満員となり、ロビーに戻る");
+                SceneTransitionManager.Instance.LoadScene("LobbyScene");
             }
         }
     }
@@ -120,7 +97,6 @@ public class RoomLANConfig : NetworkBehaviour
     [ClientRpc]
     private void MovePlayerClientRpc(ulong clientId, Vector3 position)
     {
-        // 只有对应的客户端才会执行移动
         if (NetworkManager.Singleton.LocalClientId == clientId)
         {
             NetworkManager.Singleton.SpawnManager.GetPlayerNetworkObject(clientId).transform.position = position;

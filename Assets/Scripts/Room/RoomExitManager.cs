@@ -1,5 +1,4 @@
 ﻿using Unity.Netcode;
-using UnityEngine.SceneManagement;
 using UnityEngine;
 
 public class RoomExitManager : NetworkBehaviour
@@ -9,7 +8,7 @@ public class RoomExitManager : NetworkBehaviour
     {
         if (!IsHost && NetworkManager.Singleton.IsConnectedClient)
         {
-            Debug.Log("收到主机命令：返回大厅");
+            Debug.Log("ホストコマンドを受信: ロビーに戻る");
             NetworkManager.Singleton.Shutdown();
             SceneTransitionManager.Instance.LoadScene(sceneName);
         }
