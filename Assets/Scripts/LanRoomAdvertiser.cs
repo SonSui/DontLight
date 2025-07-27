@@ -6,11 +6,10 @@ using UnityEngine;
 
 public class LanRoomAdvertiser : MonoBehaviour
 {
-    private UdpClient udpSender;
-    private int num = 0;
     private float timer = 0f;
     private float broadcastInterval = 1f;
     private string playerStat;
+    private UdpClient udpSender;
 
     void Start()
     {
@@ -33,7 +32,7 @@ public class LanRoomAdvertiser : MonoBehaviour
     void BroadcastRoomInfo()
     {
         int currentPlayerNum = NetworkManager.Singleton.ConnectedClients.Count;
-        string roomInfo = "roomName=Room" + StaticEvents.hostIP + ";roomStat=preparation;playerNum=" + currentPlayerNum;
+        string roomInfo = "roomName=墓地" + StaticEvents.hostIP + ";roomStat=preparation;gameMap=1;playerNum=" + currentPlayerNum;
         byte[] data = Encoding.UTF8.GetBytes(roomInfo);
 
         IPEndPoint endPoint = new IPEndPoint(IPAddress.Broadcast, 8888);

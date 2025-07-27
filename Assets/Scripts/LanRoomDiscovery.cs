@@ -9,16 +9,20 @@ using System.Collections.Generic;
 
 public class LanRoomDiscovery : MonoBehaviour
 {
+    [Header("Room List Settings")]
     public GameObject listPanelPrefab;
     public GameObject NoPeople;
     public Transform contentParent;
+
+    [Header("Join Button Settings")]
     public Sprite greenSprite;
     public Sprite redSprite;
-    private UdpClient udpReceiver;
+    
     private long nowTimer;
     private float roomRefresh = 1000f;
     private float roomTimeout = 1800f;
     private bool isListening = true;
+    private UdpClient udpReceiver;
     private Dictionary<string, Dictionary<string, string>> roomDetail = new Dictionary<string, Dictionary<string, string>>();
 
     void Start()

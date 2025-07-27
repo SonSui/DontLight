@@ -8,7 +8,7 @@ using System.Collections.Generic;
 
 public class RoomLANConfig : NetworkBehaviour
 {
-    [Header("Port")]
+    [Header("Host Port")]
     public ushort port = 7777;
 
     [Header("Spawn Positions")]
