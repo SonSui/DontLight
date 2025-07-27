@@ -21,6 +21,8 @@ public class Bulb : MonoBehaviour
     public float highSpeedDamage = 5f;   // 高速時の追加ダメージ
     public GameObject impactEffect2D;     // 2Dヒットエフェクト
     public float highSpeedTime = 1.8f;
+
+    private bool isDestroying = false;
     private void Start()
     {
         if (bulbLight != null)
@@ -59,6 +61,8 @@ public class Bulb : MonoBehaviour
     }
     private void OnDestroy()
     {
+        isDestroying = true;
+
         if (extinguishSequence != null && extinguishSequence.IsActive())
         {
             extinguishSequence.Kill();
@@ -174,7 +178,7 @@ public class Bulb : MonoBehaviour
             // 完了後に削除
             extinguishSequence.OnComplete(() =>
             {
-                if (this == null || gameObject == null) return;
+                if (isDestroying) return;
                 if (isDebug) Debug.Log($"[BULB] {name} extinguished and destroyed.");
                 Destroy(gameObject);
             });

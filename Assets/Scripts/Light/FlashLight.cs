@@ -122,6 +122,7 @@ public class Flashlight : MonoBehaviour
         if (flashlightLight != null)
         {
             flashlightLight.enabled = isEnabled;
+            flashlightLight.intensity = isEnabled ? intensity : 0f; // ONなら光の強さを設定、OFFなら0にする
         }
         if (isDebug) Debug.Log($"[FLASHLIGHT] {name} flashlight is now {(isEnabled ? "enabled" : "disabled")}.");
         GetComponent<AudioSource>()?.Play(); // ON/OFF時に音を鳴らす（AudioSourceがあれば）
@@ -157,6 +158,7 @@ public class Flashlight : MonoBehaviour
         seq.OnComplete(() =>
         {
             flashlightLight.enabled = false;
+            isEnabled = false; // 懐中電灯を無効化
             shutdownTween = null;
             isShuttingDown = false;
             if (isDebug) Debug.Log($"[FLASHLIGHT] {name} forced shutdown complete.");

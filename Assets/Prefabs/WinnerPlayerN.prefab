@@ -1428,7 +1428,7 @@ GameObject:
   - component: {fileID: 8030638650483274889}
   - component: {fileID: 5824840661915623140}
   m_Layer: 7
-  m_Name: Player
+  m_Name: WinnerPlayerN
   m_TagString: Player
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1442,16 +1442,16 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 8412751905399671330}
   serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalRotation: {x: 0, y: 1, z: 0, w: 0}
   m_LocalPosition: {x: 0, y: 0.102, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_LocalScale: {x: 3, y: 3, z: 3}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 2236491250331383402}
   - {fileID: 6810467294190950539}
   - {fileID: 1537246418319121398}
   m_Father: {fileID: 0}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 180, z: 0}
 --- !u!54 &2791712479856519777
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -1644,7 +1644,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d5a57f767e5e46a458fc5d3c628d0cbb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  GlobalObjectIdHash: 580192995
+  GlobalObjectIdHash: 3855420078
   InScenePlacedSourceGlobalObjectIdHash: 0
   DeferredDespawnTick: 0
   Ownership: 1
@@ -1721,9 +1721,7 @@ MonoBehaviour:
   damageEffect: {fileID: 5972895601153958419}
   damageEffectDuration: 0.5
   healEffect: {fileID: 3576285456232200278}
-  chargeDampingMax: 6
   chargeDampingAmount: 1
-  chargeDampingRecoverAmount: 1
   flashlight: {fileID: 3964696288890778498}
   isFlashlightOn: 1
   isTest: 1
@@ -1762,7 +1760,7 @@ MonoBehaviour:
   rotateSpeed: 5
   GamepadDeadZone: 0.1
   grenadeThrower: {fileID: 4306944721514377069}
-  playerParams: {fileID: 5400428340969232972}
+  playerParams: {fileID: 0}
 --- !u!82 &5824840661915623140
 AudioSource:
   m_ObjectHideFlags: 0

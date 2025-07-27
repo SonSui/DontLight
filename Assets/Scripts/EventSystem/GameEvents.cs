@@ -57,7 +57,7 @@ public class GameEvents
         // 電池変化
         public static Action<int, float,bool> OnBatteryChanged;
 
-        // 電球状態変化<プレーヤー番号,電球状態>（0 = 無, 1 = 持ってる, 2 = CD中）
+        // 電球状態変化<プレーヤー番号,電球状態>（0 = 無, 1 = 持ってる）
         public static Action<int, int> OnBulbStateChanged;
 
         public static Action<PlayerData> OnWinnerSet; // 勝者が決定したときに呼ばれるイベント

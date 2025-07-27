@@ -998,10 +998,10 @@ MonoBehaviour:
   startPoint: {x: 0, y: 768}
   endPoint: {x: 0, y: 0}
   enterDuration: 0.5
-  bounceHeight: 80
-  bounceDuration: 0.2
-  finalBounceHeight: 40
-  finalBounceDuration: 0.4
+  bounceHeight: 60
+  bounceDuration: 0.25
+  finalBounceHeight: 30
+  finalBounceDuration: 0.1
 --- !u!114 &1488640346
 MonoBehaviour:
   m_ObjectHideFlags: 0
