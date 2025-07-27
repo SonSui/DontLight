@@ -3,36 +3,44 @@ using DG.Tweening;
 
 public class Bulb : MonoBehaviour
 {
+    [Header("é›»çƒã®è¨­å®š")]
     private float radius = 2f;
     public float rangeOffset = 0.9f;
     public int damagePerSecond = 1;
-    public bool isDebug = false; // ƒfƒoƒbƒO—p‚Ìƒtƒ‰ƒO
-    public Light bulbLight; // “d‹…‚ÌLightƒRƒ“ƒ|[ƒlƒ“ƒg
+    public bool isDebug = false; // ãƒ‡ãƒãƒƒã‚°ç”¨ã®ãƒ•ãƒ©ã‚°
+    public Light bulbLight; // é›»çƒã®Lightã‚³ãƒ³ãƒãƒ¼ãƒãƒ³ãƒˆ
 
     private float sqrRadius;
-    private float minDmgDistance = 0.01f; // Å¬ƒ_ƒ[ƒW‹——£
-    private bool isExtinguished = false; // “d‹…‚ªÁ“”’†‚©‚Ç‚¤‚©
-    private float spawnTime = 0.5f; // “d‹…‚ÌƒXƒ|[ƒ“ŠÔ
+    private float minDmgDistance = 0.01f; // æœ€å°ãƒ€ãƒ¡ãƒ¼ã‚¸è·é›¢
+    private bool isExtinguished = false; // é›»çƒãŒæ¶ˆç¯ä¸­ã‹ã©ã†ã‹
+    private float spawnTime = 0.5f; // é›»çƒã®ã‚¹ãƒãƒ¼ãƒ³æ™‚é–“
+    private Sequence extinguishSequence;
+
+    [Header("é«˜é€Ÿè¡çªã®è¨­å®š")]
+    public float highSpeedThreshold = 3f; // é«˜é€Ÿã®ã—ãã„å€¤
+    public float highSpeedDamage = 5f;   // é«˜é€Ÿæ™‚ã®è¿½åŠ ãƒ€ãƒ¡ãƒ¼ã‚¸
+    public GameObject impactEffect2D;     // 2Dãƒ’ãƒƒãƒˆã‚¨ãƒ•ã‚§ã‚¯ãƒˆ
+    public float highSpeedTime = 1.8f;
     private void Start()
     {
         if (bulbLight != null)
         {
-            radius = bulbLight.range * rangeOffset; // Light‚Ìrange‚ğ0.9”{‚µ‚Äg—p
+            radius = bulbLight.range * rangeOffset; // Lightã®rangeã‚’0.9å€ã—ã¦ä½¿ç”¨
             if (isDebug) Debug.Log($"[BULB] {name} loaded radius from Light component. radius={radius}");
         }
         else
         {
-            // –œ‚ªˆê Light ‚ª‚È‚¢ê‡AƒfƒtƒHƒ‹ƒg’l‚ğg‚¤
-            radius = 2f * rangeOffset; // ƒfƒtƒHƒ‹ƒg‚Ì”¼Œa
+            // ä¸‡ãŒä¸€ Light ãŒãªã„å ´åˆã€ãƒ‡ãƒ•ã‚©ãƒ«ãƒˆå€¤ã‚’ä½¿ã†
+            radius = 2f * rangeOffset; // ãƒ‡ãƒ•ã‚©ãƒ«ãƒˆã®åŠå¾„
             if (isDebug) Debug.LogWarning($"[BULB] {name} Light component not found. Using default radius.");
         }
         sqrRadius = radius * radius;
-        bulbLight.enabled = false; // ‰Šúó‘Ô‚Å‚ÍŒõ‚ğÁ‚µ‚Ä‚¨‚­
+        bulbLight.enabled = false; // åˆæœŸçŠ¶æ…‹ã§ã¯å…‰ã‚’æ¶ˆã—ã¦ãŠã
         GameEvents.Light.OnPointLightCreated?.Invoke(this);
     }
     private void Update()
     {
-        // ƒXƒ|[ƒ“ŠÔ‚ªŒo‰ß‚µ‚½‚çA“d‹…‚ÌŒõ‚ğ—LŒø‚É‚·‚é
+        // ã‚¹ãƒãƒ¼ãƒ³æ™‚é–“ãŒçµŒéã—ãŸã‚‰ã€é›»çƒã®å…‰ã‚’æœ‰åŠ¹ã«ã™ã‚‹
         if (spawnTime > 0)
         {
             spawnTime -= Time.deltaTime;
@@ -42,9 +50,19 @@ public class Bulb : MonoBehaviour
                 if (isDebug) Debug.Log($"[BULB] {name} light enabled after spawn time.");
             }
         }
+        if(highSpeedDamage > 0)
+        {
+            // é«˜é€Ÿè¡çªå¾Œã®ãƒ€ãƒ¡ãƒ¼ã‚¸å‡¦ç†
+            highSpeedTime -= Time.deltaTime;
+            
+        }
     }
     private void OnDestroy()
     {
+        if (extinguishSequence != null && extinguishSequence.IsActive())
+        {
+            extinguishSequence.Kill();
+        }
         GameEvents.Light.OnPointLightDestroyed?.Invoke(this);
     }
 
@@ -56,7 +74,7 @@ public class Bulb : MonoBehaviour
         Vector3 diff = player.transform.position - transform.position;
         float sqrDist = diff.sqrMagnitude;
 
-        if (sqrDist < sqrRadius) // ƒvƒŒƒCƒ„[‚Í“d‹…‚Ì”¼Œa“à‚É‚¢‚é‚©
+        if (sqrDist < sqrRadius) // ãƒ—ãƒ¬ã‚¤ãƒ¤ãƒ¼ã¯é›»çƒã®åŠå¾„å†…ã«ã„ã‚‹ã‹
         {
             float damage = damagePerSecond * Time.deltaTime;
             DamageInfo damageInfo = new DamageInfo
@@ -68,14 +86,14 @@ public class Bulb : MonoBehaviour
 
             if (sqrDist < minDmgDistance * minDmgDistance)
             {
-                // ƒvƒŒƒCƒ„[‚ª”ñí‚É‹ß‚¢ê‡A’¼Úƒ_ƒ[ƒW‚ğ“K—p
+                // ãƒ—ãƒ¬ã‚¤ãƒ¤ãƒ¼ãŒéå¸¸ã«è¿‘ã„å ´åˆã€ç›´æ¥ãƒ€ãƒ¡ãƒ¼ã‚¸ã‚’é©ç”¨
                 if (isDebug) Debug.Log($"[BULB] Player {player.name} is VERY CLOSE to bulb {name}. Direct damage applied.");
 
                 GameEvents.PlayerEvents.OnTakeLightDamage?.Invoke(player, damageInfo);
             }
             else
             {
-                // ƒvƒŒƒCƒ„[‚ª“d‹…‚Ì”¼Œa“à‚É‚¢‚é‚ªA”ñí‚É‹ß‚­‚È‚¢ê‡
+                // ãƒ—ãƒ¬ã‚¤ãƒ¤ãƒ¼ãŒé›»çƒã®åŠå¾„å†…ã«ã„ã‚‹ãŒã€éå¸¸ã«è¿‘ããªã„å ´åˆ
                 Vector3 dir = diff.normalized;
                 float distance = Mathf.Sqrt(sqrDist);
 
@@ -84,7 +102,7 @@ public class Bulb : MonoBehaviour
 
                 if (isDebug) Debug.DrawRay(transform.position, dir * distance, Color.red, 0.1f);
 
-                // ƒŒƒCƒLƒƒƒXƒg‚ğg—p‚µ‚ÄA“d‹…‚©‚çƒvƒŒƒCƒ„[‚Ü‚Å‚ÌŠÔ‚ÉáŠQ•¨‚ª‚ ‚é‚©ƒ`ƒFƒbƒN
+                // ãƒ¬ã‚¤ã‚­ãƒ£ã‚¹ãƒˆã‚’ä½¿ç”¨ã—ã¦ã€é›»çƒã‹ã‚‰ãƒ—ãƒ¬ã‚¤ãƒ¤ãƒ¼ã¾ã§ã®é–“ã«éšœå®³ç‰©ãŒã‚ã‚‹ã‹ãƒã‚§ãƒƒã‚¯
                 if (Physics.Raycast(ray, out hit, distance, obstacleMask))
                 {
                     if (isDebug) Debug.DrawRay(transform.position, dir * hit.distance, Color.green, 0.1f);
@@ -98,8 +116,39 @@ public class Bulb : MonoBehaviour
             }
         }
     }
+
+    private void OnCollisionEnter(Collision collision)
+    {
+        if (isExtinguished || highSpeedTime <= 0f) return;
+        if (collision.gameObject.CompareTag("Player"))
+        {
+            Rigidbody rb = GetComponent<Rigidbody>();
+            if (rb != null && rb.linearVelocity.magnitude >= highSpeedThreshold)
+            {
+                // é«˜é€Ÿè¡çªã¨åˆ¤å®š
+                Debug.Log($"[BULB] {name} high-speed collided with {collision.gameObject.name}");
+
+                // ãƒ€ãƒ¡ãƒ¼ã‚¸è¨ˆç®—
+                DamageInfo damageInfo = new DamageInfo
+                {
+                    attacker = gameObject,
+                    damage = highSpeedDamage,
+                    hitPoint = collision.contacts[0].point
+                };
+                GameEvents.PlayerEvents.OnTakeLightDamage?.Invoke(collision.gameObject, damageInfo);
+
+                // 2Dãƒ’ãƒƒãƒˆã‚¨ãƒ•ã‚§ã‚¯ãƒˆç”Ÿæˆ
+                if (impactEffect2D != null)
+                {
+                    Vector3 spawnPos = collision.contacts[0].point;
+                    Instantiate(impactEffect2D, spawnPos, Quaternion.identity);
+                }
+            }
+        }
+    }
+
     /// <summary>
-    /// “d‹…‚ğÁ“”‚³‚¹‚éˆ—i1•bŠÔ“_–Å‚µ‚È‚ª‚çŒõ‚ªã‚­‚È‚éj
+    /// é›»çƒã‚’æ¶ˆç¯ã•ã›ã‚‹å‡¦ç†ï¼ˆ1ç§’é–“ç‚¹æ»…ã—ãªãŒã‚‰å…‰ãŒå¼±ããªã‚‹ï¼‰
     /// </summary>
     public void Extinguish()
     {
@@ -110,21 +159,22 @@ public class Bulb : MonoBehaviour
         {
             float originalIntensity = bulbLight.intensity;
 
-            // ƒV[ƒPƒ“ƒXì¬
-            Sequence seq = DOTween.Sequence();
+            // ã‚·ãƒ¼ã‚±ãƒ³ã‚¹ä½œæˆ
+            extinguishSequence = DOTween.Sequence();
 
-            
-            seq.Append(bulbLight.DOIntensity(0, 0.25f));                    // ˆÃ‚­‚È‚é
-            seq.Append(bulbLight.DOIntensity(originalIntensity, 0.25f));    // –¾‚é‚­‚È‚é
-            seq.Append(bulbLight.DOIntensity(0, 0.25f));                    // ˆÃ‚­‚È‚é
-            seq.Append(bulbLight.DOIntensity(originalIntensity, 0.25f));    // –¾‚é‚­‚È‚é
 
-            
-            seq.Append(bulbLight.DOIntensity(0, 0.5f));
+            extinguishSequence.Append(bulbLight.DOIntensity(0, 0.25f));                    // æš—ããªã‚‹
+            extinguishSequence.Append(bulbLight.DOIntensity(originalIntensity, 0.25f));    // æ˜ã‚‹ããªã‚‹
+            extinguishSequence.Append(bulbLight.DOIntensity(0, 0.25f));                    // æš—ããªã‚‹
+            extinguishSequence.Append(bulbLight.DOIntensity(originalIntensity, 0.25f));    // æ˜ã‚‹ããªã‚‹
 
-            // Š®—¹Œã‚Éíœ
-            seq.OnComplete(() =>
+
+            extinguishSequence.Append(bulbLight.DOIntensity(0, 0.5f));
+
+            // å®Œäº†å¾Œã«å‰Šé™¤
+            extinguishSequence.OnComplete(() =>
             {
+                if (this == null || gameObject == null) return;
                 if (isDebug) Debug.Log($"[BULB] {name} extinguished and destroyed.");
                 Destroy(gameObject);
             });
@@ -136,4 +186,5 @@ public class Bulb : MonoBehaviour
             Destroy(gameObject);
         }
     }
+    
 }

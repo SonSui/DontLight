@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -10,6 +11,9 @@ public class PlayerManager : MonoBehaviour
     public Transform[] spawnPoints;
 
     private int registeredPlayerCount = 0; // （テスト用）登録されたプレイヤーの数
+
+    // プレイヤーインデックスと生存状況のマッピング
+    private Dictionary<int, bool> playerAliveTable = new();
 
     private void Awake()
     {
@@ -55,6 +59,10 @@ public class PlayerManager : MonoBehaviour
             inputOnly.Delete();
 
             inputPlayer.GetComponent<PlayerTestSon>().SetIndex(data.playerIndex);
+            inputPlayer.GetComponent<PlayerTestSon>().SetPlayerData(data);
+
+            // 生存状態をtrueに設定
+            playerAliveTable[data.playerIndex] = true;
 
             // 生成 UI
             GameEvents.PlayerEvents.OnPlayerUIAdd?.Invoke(playerMap[inputPlayer.gameObject]);
@@ -65,7 +73,44 @@ public class PlayerManager : MonoBehaviour
     private void RemovePlayer(GameObject player)
     {
         Debug.Log("Player removed: " + player.name);
-        playerMap.Remove(player);
+
+        if (!playerMap.TryGetValue(player, out var data))
+        {
+            Debug.LogWarning("死亡プレイヤーが登録されていません。");
+            return;
+        }
+
+        int index = data.playerIndex;
+        playerAliveTable[index] = false;  // 生存フラグをfalseに設定
+        playerMap.Remove(player);         // プレイヤーデータ削除
+
+        // 生存しているプレイヤーを数える
+        int aliveCount = 0;
+        int lastAliveIndex = -1;
+
+        foreach (var kvp in playerAliveTable)
+        {
+            if (kvp.Value)
+            {
+                aliveCount++;
+                lastAliveIndex = kvp.Key;
+            }
+        }
+
+        // 最後の1人になった場合、勝利イベントを通知
+        if (aliveCount == 1)
+        {
+            foreach (var kvp in playerMap)
+            {
+                if(kvp.Value.playerIndex == lastAliveIndex)
+                {
+                    Debug.Log($"勝者：プレイヤー{lastAliveIndex}");
+                    GameEvents.PlayerEvents.OnWinnerSet?.Invoke(kvp.Value);
+                    kvp.Key.GetComponent<PlayerTestSon>().SetWinnder();// 勝利フラグを設定
+                    break;
+                }
+            }
+        }
     }
 
     public Dictionary<GameObject, PlayerData> GetAllPlayers()
@@ -83,6 +128,8 @@ public class PlayerManager : MonoBehaviour
             Debug.LogWarning($"Player {player.name} not found in the list.");
         }
     }
+
+    // GameScene、PlayerInput未登録状態でテスト用
     private void AddPlayer(GameObject player)
     {
         if (!playerMap.ContainsKey(player))
@@ -108,7 +155,7 @@ public class PlayerManager : MonoBehaviour
             // UI生成
             GameEvents.PlayerEvents.OnPlayerUIAdd?.Invoke(playerMap[player]);
 
-
+            playerAliveTable[index] = true;
         }
     }
 }

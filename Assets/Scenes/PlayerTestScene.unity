@@ -294,11 +294,6 @@ PrefabInstance:
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: f9d143e24f9016248b431307a5dc4a12, type: 3}
---- !u!1 &264133982 stripped
-GameObject:
-  m_CorrespondingSourceObject: {fileID: 8412751905399671330, guid: f9d143e24f9016248b431307a5dc4a12, type: 3}
-  m_PrefabInstance: {fileID: 264133981}
-  m_PrefabAsset: {fileID: 0}
 --- !u!1 &269391816
 GameObject:
   m_ObjectHideFlags: 0
@@ -580,7 +575,7 @@ MonoBehaviour:
       m_SingletonActionBindings: []
       m_Flags: 0
     m_Reference: {fileID: 0}
-  m_PlayerPrefab: {fileID: 264133982}
+  m_PlayerPrefab: {fileID: 1845959028}
   m_SplitScreen: 0
   m_MaintainAspectRatioInSplitScreen: 0
   m_FixedNumberOfSplitScreens: -1
@@ -1240,6 +1235,11 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   m_Asset: {fileID: -944628639613478452, guid: 052faaac586de48259a63d0c4782560b, type: 3}
   m_ActionId: dad70c86-b58c-4b17-88ad-f5e53adf419e
+--- !u!1 &1845959028 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 8412751905399671330, guid: 030c98000ec94b945af8c4a20383fa51, type: 3}
+  m_PrefabInstance: {fileID: 533682873}
+  m_PrefabAsset: {fileID: 0}
 --- !u!114 &1926127282
 MonoBehaviour:
   m_ObjectHideFlags: 0
