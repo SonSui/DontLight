@@ -14,7 +14,6 @@ public class Bulb : MonoBehaviour
     private float minDmgDistance = 0.01f; // 最小ダメージ距離
     private bool isExtinguished = false; // 電球が消灯中かどうか
     private float spawnTime = 0.5f; // 電球のスポーン時間
-    private Sequence extinguishSequence;
 
     [Header("高速衝突の設定")]
     public float highSpeedThreshold = 3f; // 高速のしきい値
@@ -59,10 +58,6 @@ public class Bulb : MonoBehaviour
     }
     private void OnDestroy()
     {
-        if (extinguishSequence != null && extinguishSequence.IsActive())
-        {
-            extinguishSequence.Kill();
-        }
         GameEvents.Light.OnPointLightDestroyed?.Invoke(this);
     }
 
@@ -160,21 +155,20 @@ public class Bulb : MonoBehaviour
             float originalIntensity = bulbLight.intensity;
 
             // シーケンス作成
-            extinguishSequence = DOTween.Sequence();
+            Sequence seq = DOTween.Sequence();
 
+            
+            seq.Append(bulbLight.DOIntensity(0, 0.25f));                    // 暗くなる
+            seq.Append(bulbLight.DOIntensity(originalIntensity, 0.25f));    // 明るくなる
+            seq.Append(bulbLight.DOIntensity(0, 0.25f));                    // 暗くなる
+            seq.Append(bulbLight.DOIntensity(originalIntensity, 0.25f));    // 明るくなる
 
-            extinguishSequence.Append(bulbLight.DOIntensity(0, 0.25f));                    // 暗くなる
-            extinguishSequence.Append(bulbLight.DOIntensity(originalIntensity, 0.25f));    // 明るくなる
-            extinguishSequence.Append(bulbLight.DOIntensity(0, 0.25f));                    // 暗くなる
-            extinguishSequence.Append(bulbLight.DOIntensity(originalIntensity, 0.25f));    // 明るくなる
-
-
-            extinguishSequence.Append(bulbLight.DOIntensity(0, 0.5f));
+            
+            seq.Append(bulbLight.DOIntensity(0, 0.5f));
 
             // 完了後に削除
-            extinguishSequence.OnComplete(() =>
+            seq.OnComplete(() =>
             {
-                if (this == null || gameObject == null) return;
                 if (isDebug) Debug.Log($"[BULB] {name} extinguished and destroyed.");
                 Destroy(gameObject);
             });
@@ -186,5 +180,4 @@ public class Bulb : MonoBehaviour
             Destroy(gameObject);
         }
     }
-    
 }

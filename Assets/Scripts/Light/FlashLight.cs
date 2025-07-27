@@ -68,7 +68,7 @@ public class Flashlight : MonoBehaviour
 
         Vector3 dirNormalized = dirToPlayer.normalized;              // 単位ベクトルを取得
 
-        // Forward方向とプレイヤー方向との内積を計算
+        // 手電筒のForward方向とプレイヤー方向との内積を計算
         float dot = Vector3.Dot(lightForward, dirNormalized);
 
         // スポット角度の半分をラジアンに変換
