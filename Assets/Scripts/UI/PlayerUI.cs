@@ -70,10 +70,6 @@ public class PlayerUI : MonoBehaviour
             case 1:
                 bulbUI?.SetBulbState(true);  // ‚Á‚Ä‚¢‚é
                 break;
-            case 2:
-                bulbUI?.SetBulbState(false);
-                bulbUI?.StartCooldown();     // CD’†i“à•”CDŠÔ‚É]‚¤j
-                break;
         }
     }
 

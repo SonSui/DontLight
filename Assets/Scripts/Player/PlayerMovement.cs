@@ -20,6 +20,7 @@ public class PlayerMovement : MonoBehaviour
     private InputAction switchTargetAction;
     private InputAction cancelThrowingAction;
     private InputAction chargingAction;
+    private InputAction toggleAction;
 
     // 入力値キャッシュ
     // Cached input values
@@ -57,10 +58,10 @@ public class PlayerMovement : MonoBehaviour
     // 手榴弹投掷逻辑的引用
     [SerializeField] private SpawnGrenade grenadeThrower;
 
-    // 懐中電灯やバッテリー制御クラス参照
-    // Reference to player flashlight parameters
-    // 玩家手电筒参数控制器引用
-    [SerializeField] private PlayerParameters playerParams;
+    // プレイヤーのパラメータ
+    // Player parameters
+    // 玩家参数
+    [SerializeField] private PlayerTestSon playerParams;
 
     private void Awake()
     {
@@ -75,6 +76,7 @@ public class PlayerMovement : MonoBehaviour
         switchTargetAction = playerInput.actions.FindAction("SwitchTarget");
         cancelThrowingAction = playerInput.actions.FindAction("CancelThrowing");
         chargingAction = playerInput.actions.FindAction("Charging");
+        toggleAction = playerInput.actions.FindAction("ToggleLight");
 
         // イベント登録（投擲、照準、充電等）
         // Register input events
@@ -84,6 +86,7 @@ public class PlayerMovement : MonoBehaviour
         switchTargetAction.performed += OnSwitchTarget;
         cancelThrowingAction.performed += OnThrowCanceledManually;
         chargingAction.performed += OnCharging;
+        toggleAction.performed += OnToggle;
 
         playerInput.onControlsChanged += OnDeviceChange;
     }
@@ -96,6 +99,11 @@ public class PlayerMovement : MonoBehaviour
         throwAction.started -= OnThrowStarted;
         throwAction.canceled -= OnThrowCanceled;
         chargingAction.performed -= OnCharging;
+        switchTargetAction.performed -= OnSwitchTarget;
+        cancelThrowingAction.performed -= OnThrowCanceledManually;
+        toggleAction.performed -= OnToggle;
+
+
 
         if (playerInput != null)
             playerInput.onControlsChanged -= OnDeviceChange;
@@ -274,6 +282,14 @@ public class PlayerMovement : MonoBehaviour
         // 懐中電灯の充電処理
         // Recharge flashlight when button pressed
         // 按下充电键时给手电筒充电
-        playerParams?.RechargeFlashlight();
+        playerParams?.BatteryCharge();
+    }
+
+    private void OnToggle(InputAction.CallbackContext ctx)
+    {
+        // 懐中電灯のオンオフ切り替え
+        // Toggle flashlight on/off
+        // 切换手电筒开关状态
+        playerParams?.ToggleFlashlight();
     }
 }

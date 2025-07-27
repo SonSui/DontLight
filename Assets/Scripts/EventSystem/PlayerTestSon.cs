@@ -19,7 +19,9 @@ public class PlayerTestSon : MonoBehaviour
 
     [Header("電池設定")]
     private float chargeDamping = 1f; // 充電の減少量
+    public float chargeDampingMax = 6f; // 充電の減少量の最大値
     public float chargeDampingAmount = 1f; // 充電の減少量の増加量
+    public float chargeDampingRecoverAmount = 1f; // 充電の減少量の回復量
     private float currentBattery = 10f; // 初期電池残量
     public Flashlight flashlight; // フラッシュライトの参照
     public bool isFlashlightOn = true; // フラッシュライトの状態
@@ -34,7 +36,18 @@ public class PlayerTestSon : MonoBehaviour
     public Renderer playerRenderer;
     
 
+    [Header("アニメーション設定")]
+    public float deathDelay = 0.3f; // 死亡アニメーションの遅延時間
+    public float reductionTime = 0.5f; // 死亡アニメーションの縮小時間
+    public float reductionScale = 0.05f; // 死亡アニメーションの縮小率
+    public Animator animatorMesh;
+    public AudioSource audioSource; // プレイヤーの音声ソース
+    private Sequence currentSequence;
+    private bool IsPlaying => currentSequence != null && currentSequence.IsActive() && currentSequence.IsPlaying();
+
+
     public bool isWinner = false; // 勝利フラグ
+    public bool isDying = false; // 死亡中フラグ
 
 
     public void SetIndex(int index)
@@ -76,7 +89,7 @@ public class PlayerTestSon : MonoBehaviour
     private void Update()
     {
         if(isWinner) return; // 勝利者は更新処理を行わない
-        if (lastDamageTime > HPRecoverCooldown)
+        if (lastDamageTime > HPRecoverCooldown && !isDying)
         {
             if (currentHP < maxHP)
             {
@@ -111,7 +124,7 @@ public class PlayerTestSon : MonoBehaviour
         }
         if(chargeDamping > 1f)
         {
-            chargeDamping -= chargeDampingAmount * Time.deltaTime; // 充電の減少
+            chargeDamping -= Time.deltaTime * chargeDampingRecoverAmount; // 充電の減少量を回復
             chargeDamping = Mathf.Max(1f, chargeDamping); // 1f未満にならないようにする
         }
         if(bulbCooldown > 0)
@@ -141,17 +154,48 @@ public class PlayerTestSon : MonoBehaviour
 
     public void Die()
     {
-        if(isWinner) return; // 勝利者は死亡しない
-        GameEvents.PlayerEvents.OnHPChanged?.Invoke(playerData.playerIndex, new HPInfo(0, 0, true));
-        GameEvents.PlayerEvents.OnPlayerDied?.Invoke(this.gameObject);
-        Destroy(gameObject);
+        if (isWinner||isDying) return; // 勝利者または既に死亡中のプレイヤーは死亡処理を行わない
+        if (IsPlaying)
+        {
+            Debug.Log("Already Dying, skipping.");
+            return;
+        }
+
+        isDying = true; // 死亡中フラグを立てる
+
+        damageEffect.SetActive(false); // ダメージエフェクトを非表示にする
+        healEffect.SetActive(false); // 回復エフェクトを非表示にする
+
+        animatorMesh.SetTrigger("Dead"); // 死亡アニメーションを再生
+        animatorMesh.SetBool("IsAlive", false); // 死亡中のフラグを立てる
+
+        audioSource.Play(); // 死亡音を再生
+
+        currentSequence = DOTween.Sequence();
+
+        currentSequence.AppendInterval(deathDelay);
+        currentSequence.Append(transform.DOScale(Vector3.one * reductionScale, reductionTime).SetEase(Ease.InBack));
+        currentSequence.OnComplete(() =>
+        {
+            GameEvents.PlayerEvents.OnHPChanged?.Invoke(playerData.playerIndex, new HPInfo(0, 0, true));
+            GameEvents.PlayerEvents.OnPlayerDied?.Invoke(this.gameObject);
+            Destroy(gameObject);
+        });
+
+    }
+    private void OnDestroy()
+    {
+        if (currentSequence != null && currentSequence.IsActive())
+        {
+            currentSequence.Kill();
+        }
     }
     /// <summary>
     /// 光源などによるダメージを受ける
     /// </summary>
     public void TakeDamage(DamageInfo damageInfo)
     {
-        if (isWinner) return; // 勝利者はダメージを受けない
+        if (isWinner || isDying) return; // 勝利者または死亡中のプレイヤーはダメージを受けない
         currentHP -= damageInfo.damage;
         currentHP = Mathf.Max(0, currentHP);
         maxHP = Mathf.Min((originMaxHP-currentHP)/2 + currentHP,maxHP); // 現在のHPに応じて最大HPを調整
@@ -162,6 +206,10 @@ public class PlayerTestSon : MonoBehaviour
         {
             damageEffect.SetActive(true); // ダメージエフェクトを表示
         }
+        if(healEffect != null)
+        {
+            healEffect.SetActive(false); // 回復エフェクトを非表示
+        }
 
         // UI更新イベントを送信
         GameEvents.PlayerEvents.OnHPChanged?.Invoke(playerData.playerIndex, new HPInfo(currentHP, maxHP, true));
@@ -170,7 +218,7 @@ public class PlayerTestSon : MonoBehaviour
         Debug.Log($"[Player{playerData.playerIndex}] took {damageInfo.damage} damage. HP: {currentHP}");
 
         // 死亡処理
-        if (currentHP <= 0f)
+        if (currentHP <= 0f && !isDying)
         {
             Die();
         }
@@ -179,24 +227,29 @@ public class PlayerTestSon : MonoBehaviour
 
     public void ToggleFlashlight()
     {
+        if (isDying) return;
         isFlashlightOn = !isFlashlightOn;
         flashlight.ToggleFlashlight(isFlashlightOn);
     }
 
     public void BatteryCharge(float amount = 1f)
     {
-        if(currentBattery >= playerData.battery) return; // 電池が満タンなら何もしない
+        if (isDying) return; // 死亡中のプレイヤーは充電できない
+        if (currentBattery >= playerData.battery) return; // 電池が満タンなら何もしない
         currentBattery += (amount/chargeDamping);
         chargeDamping += chargeDampingAmount; // 充電の減少量を増加
+        chargeDamping = Mathf.Min(chargeDamping, chargeDampingMax); // 最大充電減少量を超えないようにする
         currentBattery = Mathf.Min(currentBattery, playerData.battery); // 最大電池残量を超えないようにする
         GameEvents.PlayerEvents.OnBatteryChanged?.Invoke(playerData.playerIndex, currentBattery, true); // 電池更新イベントを送信
     }
 
     public bool ThrowBulb()
     {
+        if (isDying) return false; // 死亡中のプレイヤーは電球を投げられない
         if (bulbCooldown > 0) return false; // 電球がクールダウン中なら投げられない
         bulbCooldown = playerData.bulbCooldown; // クールダウン時間をリセット
         GameEvents.PlayerEvents.OnBulbStateChanged?.Invoke(playerData.playerIndex, 0); // 0 = 電球ない
+        animatorMesh.SetTrigger("Attack"); // 電球を投げるアニメーションを再生
         return true; // 電球を投げることができた
     }
     public void SetWinner()
