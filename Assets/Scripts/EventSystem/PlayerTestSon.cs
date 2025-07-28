@@ -252,6 +252,11 @@ public class PlayerTestSon : MonoBehaviour
         animatorMesh.SetTrigger("Attack"); // 電球を投げるアニメーションを再生
         return true; // 電球を投げることができた
     }
+
+    public bool CanThrowBulb()
+    {
+        return !isDying && bulbCooldown <= 0; // 死亡中でなく、かつ電球がクールダウン中でない場合に投げられる
+    }
     public void SetWinner()
     {
         isWinner = true;
