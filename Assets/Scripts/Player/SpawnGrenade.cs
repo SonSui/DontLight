@@ -1,11 +1,14 @@
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
 [RequireComponent(typeof(LineRenderer))]
 public class SpawnGrenade : MonoBehaviour
 {
     private Camera mainCamera;
     private LineRenderer lineRenderer;
+    private bool canThrow = true;
+    public Color[] lineColor; 
 
     // グレネードのプレハブ
     // Grenade prefab
@@ -37,7 +40,9 @@ public class SpawnGrenade : MonoBehaviour
     // Range indicator canvas
     // 范围指示器
     [SerializeField] private GameObject rangeIndicatorCanvas;
+    private Image rangeIndicatorImage;
     [SerializeField] private GameObject damageRangeIndicatorCanvas;
+    private Image damageRangeIndicatorImage;
 
     // ターゲット層
     // Target layer
@@ -64,6 +69,19 @@ public class SpawnGrenade : MonoBehaviour
     // 是否使用锁定模式
     private bool useLockOn = false;
 
+    private Vector2 lookInput = Vector2.zero;
+    private float lockBreakDeadzone = 0.3f;
+
+    private void Awake()
+    {
+        if(lineColor.Length < 2)
+        {
+            lineColor = new Color[2] {
+                Color.white, // 投擲可能時の色
+                Color.red    // 投擲不可時の色
+            };
+        }
+    }
     private void Start()
     {
         // カメラとLineRendererの初期化
@@ -75,6 +93,16 @@ public class SpawnGrenade : MonoBehaviour
         lineRenderer.enabled = false;
         rangeIndicatorCanvas.SetActive(false);
         damageRangeIndicatorCanvas.SetActive(false);
+        rangeIndicatorImage = rangeIndicatorCanvas.transform.GetChild(0)?.GetComponent<Image>();
+        damageRangeIndicatorImage = damageRangeIndicatorCanvas.transform.GetChild(0)?.GetComponent<Image>();
+        if (rangeIndicatorImage != null)
+        {
+            rangeIndicatorImage.color = lineColor[0]; // 投擲可能時の色
+        }
+        if (damageRangeIndicatorImage != null)
+        {
+            damageRangeIndicatorImage.color = lineColor[0]; // 投擲可能時の色
+        }
     }
 
     private void Update()
@@ -87,45 +115,55 @@ public class SpawnGrenade : MonoBehaviour
 
         Vector3 targetPoint;
 
-        if (useLockOn)
+        bool joystickOverride = lookInput.magnitude > lockBreakDeadzone;
+
+        if (!useLockOn)
         {
-            // 手柄モード：敵がいる時だけ表示
-            // Gamepad mode: Only show when there are enemies
-            // 手柄模式：只有有敌人时显示
-            if (targetList.Count == 0)
-            {
-                currentTarget = null;
-                lineRenderer.enabled = false;
-                return;
-            }
-            else
-            {
-                currentTarget = targetList[currentTargetIndex];
-                float distance = Vector3.Distance(transform.position, currentTarget.position);
-                if (distance > maxThrowRange)
-                {
-                    currentTarget = null;
-                    lineRenderer.enabled = false;
-                    return;
-                }
-                targetPoint = currentTarget.position;
-            }
-        }
-        else
-        {
-            // マウスモード：マウス位置を使う
-            // Mouse mode: Use mouse hit position
-            // 鼠标模式：显示鼠标位置轨迹
+            // マウス入力で照準
             if (!GetMouseTarget(out Vector3 mouseHit))
             {
                 lineRenderer.enabled = false;
                 damageRangeIndicatorCanvas.SetActive(false);
                 return;
             }
+
             targetPoint = mouseHit;
             damageRangeIndicatorCanvas.SetActive(true);
             damageRangeIndicatorCanvas.transform.position = targetPoint;
-            
+        }
+        else if (useLockOn && lookInput.magnitude <= lockBreakDeadzone && targetList.Count > 0)
+        {
+            // ロックオンモード：ターゲットを選択
+            currentTarget = targetList[currentTargetIndex];
+            float distance = Vector3.Distance(transform.position, currentTarget.position);
+            if (distance > maxThrowRange)
+            {
+                currentTarget = null;
+                lineRenderer.enabled = false;
+                return;
+            }
+            targetPoint = currentTarget.position;
+            damageRangeIndicatorCanvas.SetActive(true);
+            damageRangeIndicatorCanvas.transform.position = targetPoint;
+        }
+        else
+        {
+            // ゲームパッドの右スティック入力で照準
+            Vector3 dir = new Vector3(lookInput.x, 0, lookInput.y);
+            if (dir.sqrMagnitude < 0.01f)
+            {
+                lineRenderer.enabled = false;
+                return;
+            }
+
+            dir = dir.normalized;
+            float throwPower = Mathf.Clamp01(lookInput.magnitude);
+
+            Vector3 rawPoint = transform.position + dir * maxThrowRange * throwPower;
+            targetPoint = new Vector3(rawPoint.x, rangeIndicatorCanvas.transform.position.y, rawPoint.z);
+
+            damageRangeIndicatorCanvas.SetActive(true);
+            damageRangeIndicatorCanvas.transform.position = targetPoint;
         }
 
         cachedVelocity = CalculateLaunchVelocity(transform.position, targetPoint, flightTime);
@@ -135,6 +173,10 @@ public class SpawnGrenade : MonoBehaviour
         damageRangeIndicatorCanvas.transform.rotation = Quaternion.Euler(0f, 0f, 0f);
     }
 
+    public void SetLookInput(Vector2 input)
+    {
+        lookInput = input;
+    }
     public void StartAiming(bool lockOnMode)
     {
         // 照準開始
@@ -162,29 +204,30 @@ public class SpawnGrenade : MonoBehaviour
             lineRenderer.enabled = true;
     }
 
-    public void CancelAimingAndThrow()
+    public bool CancelAimingAndThrow()
     {
         // 照準解除と投擲
         // Cancel aiming and throw
         // 取消瞄准并投掷
-        if (!isAiming) return;
+        if (!isAiming) return false;
 
         isAiming = false;
         lineRenderer.enabled = false;
         rangeIndicatorCanvas.SetActive(false);
         damageRangeIndicatorCanvas.SetActive(false);
 
-        if (useLockOn)
+        if (useLockOn && lookInput.magnitude <= lockBreakDeadzone)
         {
             if (currentTarget == null ||
                 Vector3.Distance(transform.position, currentTarget.position) > maxThrowRange)
             {
                 Debug.Log("No target, cancel throwing");
-                return;
+                return false;
             }
         }
 
         ThrowGrenade(cachedVelocity);
+        return true;
     }
 
     public void LockToNextTarget()
@@ -222,7 +265,7 @@ public class SpawnGrenade : MonoBehaviour
         }
 
         Ray ray = mainCamera.ScreenPointToRay(UnityEngine.InputSystem.Mouse.current.position.ReadValue());
-        Plane groundPlane = new Plane(Vector3.up, transform.position);
+        Plane groundPlane = new Plane(Vector3.up, rangeIndicatorCanvas.transform.position);
 
         if (groundPlane.Raycast(ray, out float enter))
         {
@@ -302,5 +345,37 @@ public class SpawnGrenade : MonoBehaviour
         rangeIndicatorCanvas.SetActive(false);
         damageRangeIndicatorCanvas.SetActive(false);
         currentTarget = null;
+    }
+
+    public void SetCanThrow(bool canThrow)
+    {
+        // 投擲可能か設定
+        // Set whether throwing is allowed
+        // 设置是否可以投掷
+        this.canThrow = canThrow;
+        lineRenderer.colorGradient = canThrow ? new Gradient
+        {
+            colorKeys = new GradientColorKey[]
+            {
+                new GradientColorKey(lineColor[0], 0f),
+                new GradientColorKey(lineColor[0], 1f)
+            }
+        } : new Gradient
+        {
+            colorKeys = new GradientColorKey[]
+            {
+                new GradientColorKey(lineColor[1], 0f),
+                new GradientColorKey(lineColor[1], 1f)
+            }
+        };
+
+        if (rangeIndicatorImage != null)
+        {
+            rangeIndicatorImage.color = canThrow ? lineColor[0] : lineColor[1];
+        }
+        if (damageRangeIndicatorImage != null)
+        {
+            damageRangeIndicatorImage.color = canThrow ? lineColor[0] : lineColor[1];
+        }
     }
 }

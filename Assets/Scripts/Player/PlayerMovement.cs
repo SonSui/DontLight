@@ -124,6 +124,10 @@ public class PlayerMovement : MonoBehaviour
         // 每帧读取输入值
         moveInput = moveAction.ReadValue<Vector2>();
         lookInput = lookAction.ReadValue<Vector2>();
+
+
+        grenadeThrower.SetLookInput(lookInput);
+        grenadeThrower.SetCanThrow(playerParams.CanThrowBulb());
     }
 
     private void FixedUpdate()
@@ -255,7 +259,20 @@ public class PlayerMovement : MonoBehaviour
         if (!grenadeThrower.isAiming)
             return;
 
-        grenadeThrower.CancelAimingAndThrow();
+        if (playerParams.CanThrowBulb())
+        {
+            if(grenadeThrower.CancelAimingAndThrow())
+            {
+                playerParams?.ThrowBulb();
+            }
+        }
+        else
+        {
+            // 懐中電灯の充電が必要な場合はキャンセルのみ
+            // If flashlight needs charging, just cancel aiming
+            // 如果需要充电，则仅取消瞄准
+            grenadeThrower.CancelAimingOnly();
+        }
     }
 
     private void OnDestroy()

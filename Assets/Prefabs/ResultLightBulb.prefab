@@ -81,7 +81,7 @@ MonoBehaviour:
   bulbLight: {fileID: 7957784329532768979}
   highSpeedThreshold: 0.3
   highSpeedDamage: 5
-  impactEffect2D: {fileID: 3002699331061793014, guid: f9fd4a27bcdb4c347a52b2905d852901, type: 3}
+  impactEffect2D: {fileID: 3002699331061793014, guid: dd4ca0967751e6f4bb564540b2b692d3, type: 3}
   highSpeedTime: 1.8
 --- !u!136 &2092367288675232530
 CapsuleCollider:

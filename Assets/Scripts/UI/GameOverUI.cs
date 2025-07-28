@@ -7,20 +7,17 @@ public class GameOverUI : MonoBehaviour
     public static Action<PlayerData> OnWinnerSet;
 
     private RectTransform rectTransform;
+    private Sequence animationSequence;
 
-    public Vector2 startPoint = new Vector2(0, 768); // 初期位置（画面外上部）
-    public Vector2 endPoint = new Vector2(0, 0); // 終了位置（画面中央）
-    public float enterDuration = 0.5f; // 入場アニメーションの時間
-    public float bounceHeight = 30f; // バウンスの高さ
-    public float bounceDuration = 0.2f; // バウンスの時間
-    public float finalBounceHeight = 10f; // 最終的なバウンスの高さ
-    public float finalBounceDuration = 0.4f; // 最終的なバウンスの時間
-
+    public Vector2 endPoint = Vector2.zero;
+    public float enterDuration = 0.5f;
+    public float delayBeforeScale = 0.2f;
+    public float scaleDuration = 0.5f;
+    public float scaleFactor = 1.5f;
 
     private void Awake()
     {
         rectTransform = GetComponent<RectTransform>();
-        rectTransform.anchoredPosition = new Vector2(0, 768); 
     }
 
     private void OnEnable()
@@ -33,24 +30,39 @@ public class GameOverUI : MonoBehaviour
         GameEvents.PlayerEvents.OnWinnerSet -= PlayEnterAnimation;
     }
 
+    private void OnDestroy()
+    {
+        if (animationSequence != null && animationSequence.IsActive())
+        {
+            animationSequence.Kill();
+        }
+    }
+
     private void PlayEnterAnimation(PlayerData _)
     {
-        rectTransform.anchoredPosition = startPoint; // 初期位置に設定
+        // 初期化
+        if (animationSequence != null && animationSequence.IsActive())
+        {
+            animationSequence.Kill();
+        }
 
-        rectTransform.DOAnchorPosY(endPoint.y, enterDuration)
-            .SetEase(Ease.OutQuad)
-            .OnComplete(() =>
-            {
-                GetComponent<AudioSource>().Play();
-                rectTransform.DOAnchorPosY(bounceHeight,bounceDuration).SetEase(Ease.OutQuad)
-                    .OnComplete(() =>
-                    {
-                        rectTransform.DOAnchorPosY(finalBounceHeight, bounceDuration).SetEase(Ease.InOutQuad)
-                            .OnComplete(() =>
-                            {
-                                rectTransform.DOAnchorPosY(endPoint.y,finalBounceDuration).SetEase(Ease.OutBounce);
-                            });
-                    });
-            });
+        rectTransform.localScale = Vector3.one;
+        Vector2 currentPos = rectTransform.anchoredPosition;
+
+        animationSequence = DOTween.Sequence();
+
+        // 位置移動
+        animationSequence.Append(rectTransform.DOAnchorPos(endPoint, enterDuration).SetEase(Ease.OutCubic));
+
+        // 音声再生 + 待機
+        animationSequence.AppendCallback(() =>
+        {
+            GetComponent<AudioSource>()?.Play();
+        });
+
+        animationSequence.AppendInterval(delayBeforeScale);
+
+        // スケール拡大
+        animationSequence.Append(rectTransform.DOScale(Vector3.one * scaleFactor, scaleDuration).SetEase(Ease.OutBack));
     }
 }

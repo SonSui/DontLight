@@ -6,7 +6,7 @@ public class Flashlight : MonoBehaviour
     
     public float damagePerSecond = 1f;         // 毎秒ダメージ量
     public float rangeOffset = 0.9f;          // LightのrangeとspotAngleに掛けるオフセット値
-    public bool isEnabled = true;              // 懐中電灯の有効/無効
+    public bool isEnabled = false;              // 懐中電灯の有効/無効
     public GameObject owner;                   // 懐中電灯の所有者（プレイヤー）
     public bool isDebug = false;               // デバッグ用のフラグ
     public Light flashlightLight;              // 懐中電灯のLightコンポーネント
@@ -30,6 +30,10 @@ public class Flashlight : MonoBehaviour
             range = flashlightLight.range * rangeOffset;
             spotAngle = flashlightLight.spotAngle * rangeOffset;
             intensity = flashlightLight.intensity; // 初期の光の強さを取得
+            if (intensity <= 0f)
+            {
+                intensity = 10f; // 光の強さが0以下ならデフォルト値を設定
+            }
 
             if (isDebug) Debug.Log($"[FLASHLIGHT] {name} loaded settings from Light component. range={range}, spotAngle={spotAngle}");
             
@@ -41,6 +45,9 @@ public class Flashlight : MonoBehaviour
             spotAngle = 25f * rangeOffset;
             if (isDebug) Debug.LogWarning($"[FLASHLIGHT] {name} Light component not found. Using default range and spotAngle.");
         }
+
+        // 懐中電灯の初期状態を設定
+        flashlightLight.enabled = isEnabled; // 懐中電灯の有効/無効を設定
     }
     private void OnDestroy()
     {
