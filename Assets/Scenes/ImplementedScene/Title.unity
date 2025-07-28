@@ -1455,10 +1455,12 @@ MonoBehaviour:
     sceneName: LobbyScene
   - state: 1
     sceneName: LocalPreparation
-  - state: 5
+  - state: 6
     sceneName: LocalGame
-  - state: 9
+  - state: 10
     sceneName: LocalResult
+  - state: 5
+    sceneName: RoomScene
   playerColors:
   - {r: 1, g: 1, b: 1, a: 1}
   - {r: 0.42745098, g: 0.42745098, b: 0.9764706, a: 1}

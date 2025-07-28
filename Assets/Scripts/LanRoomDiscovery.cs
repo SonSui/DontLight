@@ -13,10 +13,6 @@ public class LanRoomDiscovery : MonoBehaviour
     public GameObject listPanelPrefab;
     public GameObject NoPeople;
     public Transform contentParent;
-
-    [Header("Join Button Settings")]
-    public Sprite greenSprite;
-    public Sprite redSprite;
     
     private long nowTimer;
     private float roomRefresh = 1000f;
@@ -197,8 +193,11 @@ public class LanRoomDiscovery : MonoBehaviour
                 if (joinButton != null)
                 {
                     Image buttonImage = joinButton.GetComponent<Image>();
-                    if (canJoin) buttonImage.sprite = greenSprite;
-                    else buttonImage.sprite = redSprite;
+
+                    //if (canJoin) buttonImage.sprite = greenSprite;
+                    //else buttonImage.sprite = redSprite;
+                    //joinButton.GetComponent<Button>()
+
                     joinButton.SetInformation(roomIP, activeCount);
                 }
                 firstChild.gameObject.SetActive(true);
