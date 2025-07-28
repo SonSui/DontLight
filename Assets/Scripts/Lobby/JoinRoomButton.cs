@@ -1,6 +1,4 @@
 ﻿using UnityEngine;
-using UnityEngine.EventSystems;
-
 using UnityEngine.UI;
 
 public class JoinRoomButton : MonoBehaviour
@@ -8,10 +6,6 @@ public class JoinRoomButton : MonoBehaviour
     private string roomIP;
     private int playerNum;
     private Button button;
-
-
-
-    //EventSystem.current.SetSelectedGameObject(firstSelectedButton);
 
     void Awake()
     {
@@ -26,9 +20,7 @@ public class JoinRoomButton : MonoBehaviour
     {
         if (playerNum < 4)
         {
-            StaticEvents.playerStat = "Client";
-            StaticEvents.hostIP = roomIP;
-            SceneTransitionManager.Instance.LoadScene("RoomScene");
+            OnOnlineRoomSelected();
         }
         else {
             LobbyUIManager lobbyUIManager = FindFirstObjectByType<LobbyUIManager>();
@@ -41,4 +33,10 @@ public class JoinRoomButton : MonoBehaviour
         this.playerNum = playerNum;
     }
 
+    public void OnOnlineRoomSelected()
+    {
+        StaticEvents.playerStat = "Client";
+        StaticEvents.hostIP = roomIP;
+        GameEvents.UIEvents.OnOnlineRoomEnter?.Invoke();
+    }
 }

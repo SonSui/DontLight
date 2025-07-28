@@ -88,6 +88,10 @@ public class GameManager : MonoBehaviour
         UIEvents.OnLocalGameStart += HandleLocalGameStart; // ローカルゲーム開始イベント
         UIEvents.OnOnlineGameStart += HandleOnlineGameStart; // オンラインゲーム開始イベント
         UIEvents.OnReturnToTitleScene += HandleOnReturnToTitle; // タイトル画面に戻るイベント
+        UIEvents.OnOnlineRoomEnter += HandleOnEnterOnlineRoom;
+        UIEvents.OnGameStateChange += HandleOnGameStateChange;
+
+
         PlayerEvents.OnPlayerRegistered += RegisterPlayer; // プレイヤー登録イベント
         PlayerEvents.OnWinnerSet += WinnerSetted; // 勝者設定イベント
         PrepareUIEvents.OnSetBulbCount += SetMaxBulbCount; // 最大電球数設定イベント
@@ -104,6 +108,8 @@ public class GameManager : MonoBehaviour
         UIEvents.OnLocalGameStart -= HandleLocalGameStart; // ローカルゲーム開始イベント
         UIEvents.OnOnlineGameStart -= HandleOnlineGameStart; // オンラインゲーム開始イベント
         UIEvents.OnReturnToTitleScene -= HandleOnReturnToTitle; // タイトル画面に戻るイベント
+        UIEvents.OnOnlineRoomEnter -= HandleOnEnterOnlineRoom;
+        UIEvents.OnGameStateChange -= HandleOnGameStateChange;
         PlayerEvents.OnPlayerRegistered -= RegisterPlayer; // プレイヤー登録イベント
         PlayerEvents.OnWinnerSet -= WinnerSetted; // 勝者設定イベント
         PrepareUIEvents.OnSetBulbCount -= SetMaxBulbCount; // 最大電球数設定イベント
@@ -175,7 +181,10 @@ public class GameManager : MonoBehaviour
     {
         ChangeState(GameState.OnlineRoom);
     }
-
+    private void HandleOnGameStateChange(GameState state)
+    {
+        ChangeState(state);
+    }
 
     /// <summary>
     /// ゲーム終了処理

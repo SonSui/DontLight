@@ -79,6 +79,9 @@ public class GameEvents
         public static Action OnOnlineGameStart;
 
         public static Action OnOnlineRoomEnter;
+
+        public static Action<GameState> OnGameStateChange;
+
     }
     public static class PrepareUIEvents
     {
