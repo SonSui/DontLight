@@ -3,9 +3,9 @@ using System.Net;
 using System.Net.Sockets;
 using System.Text;
 using UnityEngine;
-using UnityEngine.UI;
 using System.Collections;
 using System.Collections.Generic;
+using TMPro;
 
 public class LanRoomDiscovery : MonoBehaviour
 {
@@ -156,13 +156,13 @@ public class LanRoomDiscovery : MonoBehaviour
                     if (detail.Key == "roomName")
                     {
                         Transform roomName = firstChild.GetChild(0);
-                        Text roomNameText = roomName.GetComponent<Text>();
+                        TMP_Text roomNameText = roomName.GetComponent<TMP_Text>();
                         if (roomNameText != null) roomNameText.text = detail.Value;
                     }
                     if (detail.Key == "roomStat")
                     {
                         Transform roomStat = firstChild.GetChild(3);
-                        Text roomStatText = roomStat.GetComponent<Text>();
+                        TMP_Text roomStatText = roomStat.GetComponent<TMP_Text>();
                         if (roomStatText != null)
                         {
                             if (detail.Value == "preparation")
@@ -192,8 +192,7 @@ public class LanRoomDiscovery : MonoBehaviour
                 JoinRoomButton joinButton = join.GetComponent<JoinRoomButton>();
                 if (joinButton != null)
                 {
-                    Image buttonImage = joinButton.GetComponent<Image>();
-
+                    //Image buttonImage = joinButton.GetComponent<Image>();
                     //if (canJoin) buttonImage.sprite = greenSprite;
                     //else buttonImage.sprite = redSprite;
                     //joinButton.GetComponent<Button>()
