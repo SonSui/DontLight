@@ -70,7 +70,7 @@ public class SpawnGrenade : MonoBehaviour
     private bool useLockOn = false;
 
     private Vector2 lookInput = Vector2.zero;
-    private float lockBreakDeadzone = 0.3f;
+    private float lockBreakDeadzone = 0.15f;
 
     private void Awake()
     {
@@ -353,6 +353,7 @@ public class SpawnGrenade : MonoBehaviour
         // Set whether throwing is allowed
         // 设置是否可以投掷
         this.canThrow = canThrow;
+        if (lineRenderer != null)
         lineRenderer.colorGradient = canThrow ? new Gradient
         {
             colorKeys = new GradientColorKey[]
