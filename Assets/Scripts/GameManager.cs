@@ -7,7 +7,7 @@ using System.Collections.Generic;
 using UnityEngine.InputSystem;
 
 /// <summary>
-/// ƒQ[ƒ€‚Ìó‘Ô‚ğ’è‹`‚·‚é—ñ‹“Œ^
+/// ã‚²ãƒ¼ãƒ ã®çŠ¶æ…‹ã‚’å®šç¾©ã™ã‚‹åˆ—æŒ™å‹
 /// </summary>
 [SerializeField]
 public enum GameState
@@ -17,6 +17,7 @@ public enum GameState
     OnlinePreparation,
     OnlineAddWaitingForHost,
     OnlineAddWaitingForPlayers,
+    OnlineRoom,
     LocalPlaying,
     OnlinePlaying,
     GameOver,
@@ -27,7 +28,7 @@ public enum GameState
     None
 };
 /// <summary>
-/// ƒQ[ƒ€ó‘Ô‚ÆƒV[ƒ“–¼‚Ìƒ}ƒbƒsƒ“ƒO
+/// ã‚²ãƒ¼ãƒ çŠ¶æ…‹ã¨ã‚·ãƒ¼ãƒ³åã®ãƒãƒƒãƒ”ãƒ³ã‚°
 /// </summary>
 [System.Serializable]
 public class SceneState
@@ -37,40 +38,40 @@ public class SceneState
 };
 public class GameManager : MonoBehaviour
 {
-    public GameState CurrentGameState = GameState.MainMenu; // Œ»İ‚Ìó‘Ô
-    private GameState _previousGameState = GameState.None; // ’¼‘O‚Ìó‘Ô‚ğ•Û
+    public GameState CurrentGameState = GameState.MainMenu; // ç¾åœ¨ã®çŠ¶æ…‹
+    private GameState _previousGameState = GameState.None; // ç›´å‰ã®çŠ¶æ…‹ã‚’ä¿æŒ
 
     [Header("GameState to String")]
-    public List<SceneState> SceneStatesMap;  // Inspector‚Åİ’è‚³‚ê‚½ƒ}ƒbƒsƒ“ƒOƒŠƒXƒg
-    private Dictionary<GameState, string> _sceneState;  // Às‚Ég—p‚·‚é«‘
+    public List<SceneState> SceneStatesMap;  // Inspectorã§è¨­å®šã•ã‚ŒãŸãƒãƒƒãƒ”ãƒ³ã‚°ãƒªã‚¹ãƒˆ
+    private Dictionary<GameState, string> _sceneState;  // å®Ÿè¡Œæ™‚ã«ä½¿ç”¨ã™ã‚‹è¾æ›¸
     
     private List<InputOnlyPlayer> joinedPlayers = new List<InputOnlyPlayer>();
-    private int maxPlayers = 4; // Å‘åƒvƒŒƒCƒ„[”
-    private int registeredPlayerCount = 0; // “o˜^Ï‚İƒvƒŒƒCƒ„[”
+    private int maxPlayers = 4; // æœ€å¤§ãƒ—ãƒ¬ã‚¤ãƒ¤ãƒ¼æ•°
+    private int registeredPlayerCount = 0; // ç™»éŒ²æ¸ˆã¿ãƒ—ãƒ¬ã‚¤ãƒ¤ãƒ¼æ•°
     public List<Color> playerColors = new List<Color>();
-    public int maxBulbCount = 32; // Å‘å“d‹…”
+    public int maxBulbCount = 32; // æœ€å¤§é›»çƒæ•°
 
     public PlayerData winner = new PlayerData();
 
-    public static GameManager Instance { get; private set; }   // ƒVƒ“ƒOƒ‹ƒgƒ“ƒCƒ“ƒXƒ^ƒ“ƒX
-    private Tween stateTween; // ó‘Ô‘JˆÚƒAƒjƒ[ƒVƒ‡ƒ“i–¢g—pj
+    public static GameManager Instance { get; private set; }   // ã‚·ãƒ³ã‚°ãƒ«ãƒˆãƒ³ã‚¤ãƒ³ã‚¹ã‚¿ãƒ³ã‚¹
+    private Tween stateTween; // çŠ¶æ…‹é·ç§»ã‚¢ãƒ‹ãƒ¡ãƒ¼ã‚·ãƒ§ãƒ³ï¼ˆæœªä½¿ç”¨ï¼‰
 
     private void Awake()
     {
-        // ƒVƒ“ƒOƒ‹ƒgƒ“‚Ì‰Šú‰»
+        // ã‚·ãƒ³ã‚°ãƒ«ãƒˆãƒ³ã®åˆæœŸåŒ–
         if (Instance == null)
         {
             Instance = this;
-            DontDestroyOnLoad(gameObject); // ƒV[ƒ“ŠÔ‚Å•Û
+            DontDestroyOnLoad(gameObject); // ã‚·ãƒ¼ãƒ³é–“ã§ä¿æŒ
         }
         else
         {
             Destroy(gameObject);
         }
 
-        Application.targetFrameRate = 60; // ƒtƒŒ[ƒ€ƒŒ[ƒg‚ğ60‚Éİ’è
+        Application.targetFrameRate = 60; // ãƒ•ãƒ¬ãƒ¼ãƒ ãƒ¬ãƒ¼ãƒˆã‚’60ã«è¨­å®š
 
-        // ƒ}ƒbƒsƒ“ƒOƒŠƒXƒg‚©‚ç«‘‚ğ\’z
+        // ãƒãƒƒãƒ”ãƒ³ã‚°ãƒªã‚¹ãƒˆã‹ã‚‰è¾æ›¸ã‚’æ§‹ç¯‰
         _sceneState = new Dictionary<GameState, string>();
         foreach (var sceneState in SceneStatesMap)
         {
@@ -80,32 +81,32 @@ public class GameManager : MonoBehaviour
 
     private void OnEnable()
     {
-        // ƒCƒxƒ“ƒgw“Ç
+        // ã‚¤ãƒ™ãƒ³ãƒˆè³¼èª­
         UIEvents.OnLocalStart += HandleLocalStart;
         UIEvents.OnOnlineStart += HandleOnlineStart;
         UIEvents.OnGameClose += HandleGameQuit;
-        UIEvents.OnLocalGameStart += HandleLocalGameStart; // ƒ[ƒJƒ‹ƒQ[ƒ€ŠJnƒCƒxƒ“ƒg
-        UIEvents.OnOnlineGameStart += HandleOnlineGameStart; // ƒIƒ“ƒ‰ƒCƒ“ƒQ[ƒ€ŠJnƒCƒxƒ“ƒg
-        UIEvents.OnReturnToTitleScene += HandleOnReturnToTitle; // ƒ^ƒCƒgƒ‹‰æ–Ê‚É–ß‚éƒCƒxƒ“ƒg
-        PlayerEvents.OnPlayerRegistered += RegisterPlayer; // ƒvƒŒƒCƒ„[“o˜^ƒCƒxƒ“ƒg
-        PlayerEvents.OnWinnerSet += WinnerSetted; // ŸÒİ’èƒCƒxƒ“ƒg
-        PrepareUIEvents.OnSetBulbCount += SetMaxBulbCount; // Å‘å“d‹…”İ’èƒCƒxƒ“ƒg
+        UIEvents.OnLocalGameStart += HandleLocalGameStart; // ãƒ­ãƒ¼ã‚«ãƒ«ã‚²ãƒ¼ãƒ é–‹å§‹ã‚¤ãƒ™ãƒ³ãƒˆ
+        UIEvents.OnOnlineGameStart += HandleOnlineGameStart; // ã‚ªãƒ³ãƒ©ã‚¤ãƒ³ã‚²ãƒ¼ãƒ é–‹å§‹ã‚¤ãƒ™ãƒ³ãƒˆ
+        UIEvents.OnReturnToTitleScene += HandleOnReturnToTitle; // ã‚¿ã‚¤ãƒˆãƒ«ç”»é¢ã«æˆ»ã‚‹ã‚¤ãƒ™ãƒ³ãƒˆ
+        PlayerEvents.OnPlayerRegistered += RegisterPlayer; // ãƒ—ãƒ¬ã‚¤ãƒ¤ãƒ¼ç™»éŒ²ã‚¤ãƒ™ãƒ³ãƒˆ
+        PlayerEvents.OnWinnerSet += WinnerSetted; // å‹è€…è¨­å®šã‚¤ãƒ™ãƒ³ãƒˆ
+        PrepareUIEvents.OnSetBulbCount += SetMaxBulbCount; // æœ€å¤§é›»çƒæ•°è¨­å®šã‚¤ãƒ™ãƒ³ãƒˆ
 
 
     }
 
     private void OnDisable()
     {
-        // ƒCƒxƒ“ƒgw“Ç‰ğœ
+        // ã‚¤ãƒ™ãƒ³ãƒˆè³¼èª­è§£é™¤
         UIEvents.OnLocalStart -= HandleLocalStart;
         UIEvents.OnOnlineStart -= HandleOnlineStart;
         UIEvents.OnGameClose -= HandleGameQuit;
-        UIEvents.OnLocalGameStart -= HandleLocalGameStart; // ƒ[ƒJƒ‹ƒQ[ƒ€ŠJnƒCƒxƒ“ƒg
-        UIEvents.OnOnlineGameStart -= HandleOnlineGameStart; // ƒIƒ“ƒ‰ƒCƒ“ƒQ[ƒ€ŠJnƒCƒxƒ“ƒg
-        UIEvents.OnReturnToTitleScene -= HandleOnReturnToTitle; // ƒ^ƒCƒgƒ‹‰æ–Ê‚É–ß‚éƒCƒxƒ“ƒg
-        PlayerEvents.OnPlayerRegistered -= RegisterPlayer; // ƒvƒŒƒCƒ„[“o˜^ƒCƒxƒ“ƒg
-        PlayerEvents.OnWinnerSet -= WinnerSetted; // ŸÒİ’èƒCƒxƒ“ƒg
-        PrepareUIEvents.OnSetBulbCount -= SetMaxBulbCount; // Å‘å“d‹…”İ’èƒCƒxƒ“ƒg
+        UIEvents.OnLocalGameStart -= HandleLocalGameStart; // ãƒ­ãƒ¼ã‚«ãƒ«ã‚²ãƒ¼ãƒ é–‹å§‹ã‚¤ãƒ™ãƒ³ãƒˆ
+        UIEvents.OnOnlineGameStart -= HandleOnlineGameStart; // ã‚ªãƒ³ãƒ©ã‚¤ãƒ³ã‚²ãƒ¼ãƒ é–‹å§‹ã‚¤ãƒ™ãƒ³ãƒˆ
+        UIEvents.OnReturnToTitleScene -= HandleOnReturnToTitle; // ã‚¿ã‚¤ãƒˆãƒ«ç”»é¢ã«æˆ»ã‚‹ã‚¤ãƒ™ãƒ³ãƒˆ
+        PlayerEvents.OnPlayerRegistered -= RegisterPlayer; // ãƒ—ãƒ¬ã‚¤ãƒ¤ãƒ¼ç™»éŒ²ã‚¤ãƒ™ãƒ³ãƒˆ
+        PlayerEvents.OnWinnerSet -= WinnerSetted; // å‹è€…è¨­å®šã‚¤ãƒ™ãƒ³ãƒˆ
+        PrepareUIEvents.OnSetBulbCount -= SetMaxBulbCount; // æœ€å¤§é›»çƒæ•°è¨­å®šã‚¤ãƒ™ãƒ³ãƒˆ
 
     }
     private void Start()
@@ -120,17 +121,17 @@ public class GameManager : MonoBehaviour
     {
         if (registeredPlayerCount >= maxPlayers)
         {
-            Debug.LogWarning("Å‘åƒvƒŒƒCƒ„[”‚É’B‚µ‚Ü‚µ‚½BV‚µ‚¢ƒvƒŒƒCƒ„[‚ğ“o˜^‚Å‚«‚Ü‚¹‚ñB");
+            Debug.LogWarning("æœ€å¤§ãƒ—ãƒ¬ã‚¤ãƒ¤ãƒ¼æ•°ã«é”ã—ã¾ã—ãŸã€‚æ–°ã—ã„ãƒ—ãƒ¬ã‚¤ãƒ¤ãƒ¼ã‚’ç™»éŒ²ã§ãã¾ã›ã‚“ã€‚");
             return;
         }
 
         if (joinedPlayers.Exists(p => p.playerData.input.user == player.playerData.input.user))
         {
-            Debug.LogWarning("‚±‚ÌƒvƒŒƒCƒ„[‚Í‚·‚Å‚É“o˜^‚³‚ê‚Ä‚¢‚Ü‚·B");
+            Debug.LogWarning("ã“ã®ãƒ—ãƒ¬ã‚¤ãƒ¤ãƒ¼ã¯ã™ã§ã«ç™»éŒ²ã•ã‚Œã¦ã„ã¾ã™ã€‚");
             return;
         }
 
-        // î•ñ‚ğƒZƒbƒg
+        // æƒ…å ±ã‚’ã‚»ãƒƒãƒˆ
         player.playerData.playerIndex = registeredPlayerCount;
         player.playerData.playerName = $"P{registeredPlayerCount + 1}";
         player.playerData.playerColor = playerColors[registeredPlayerCount % playerColors.Count];
@@ -142,7 +143,7 @@ public class GameManager : MonoBehaviour
     }
 
     /// <summary>
-    /// ƒ[ƒJƒ‹‘Îí‚ÌŠJnˆ—
+    /// ãƒ­ãƒ¼ã‚«ãƒ«å¯¾æˆ¦ã®é–‹å§‹å‡¦ç†
     /// </summary>
     private void HandleLocalStart()
     {
@@ -154,7 +155,7 @@ public class GameManager : MonoBehaviour
     }
 
     /// <summary>
-    /// ƒIƒ“ƒ‰ƒCƒ“‘Îí‚ÌŠJnˆ—
+    /// ã‚ªãƒ³ãƒ©ã‚¤ãƒ³å¯¾æˆ¦ã®é–‹å§‹å‡¦ç†
     /// </summary>
     private void HandleOnlineStart()
     {
@@ -170,8 +171,14 @@ public class GameManager : MonoBehaviour
         ChangeState(GameState.MainMenu);
     }
 
+    private void HandleOnEnterOnlineRoom()
+    {
+        ChangeState(GameState.OnlineRoom);
+    }
+
+
     /// <summary>
-    /// ƒQ[ƒ€I—¹ˆ—
+    /// ã‚²ãƒ¼ãƒ çµ‚äº†å‡¦ç†
     /// </summary>
     private void HandleGameQuit()
     {
@@ -179,7 +186,7 @@ public class GameManager : MonoBehaviour
     }
 
     /// <summary>
-    /// ó‘Ô‘JˆÚˆ—i‘Î‰‚·‚éƒV[ƒ“‚Ì“Ç‚İ‚İj
+    /// çŠ¶æ…‹é·ç§»å‡¦ç†ï¼ˆå¯¾å¿œã™ã‚‹ã‚·ãƒ¼ãƒ³ã®èª­ã¿è¾¼ã¿ï¼‰
     /// </summary>
     private void ChangeState(GameState state)
     {
@@ -192,17 +199,17 @@ public class GameManager : MonoBehaviour
                     _previousGameState = CurrentGameState;
                     CurrentGameState = GameState.MainMenu;
                     
-                    ClearJoinedPlayers(); // ƒvƒŒƒCƒ„[ƒŠƒXƒg‚ğƒNƒŠƒA
-                    registeredPlayerCount = 0; // “o˜^Ï‚İƒvƒŒƒCƒ„[”‚ğƒŠƒZƒbƒg
+                    ClearJoinedPlayers(); // ãƒ—ãƒ¬ã‚¤ãƒ¤ãƒ¼ãƒªã‚¹ãƒˆã‚’ã‚¯ãƒªã‚¢
+                    registeredPlayerCount = 0; // ç™»éŒ²æ¸ˆã¿ãƒ—ãƒ¬ã‚¤ãƒ¤ãƒ¼æ•°ã‚’ãƒªã‚»ãƒƒãƒˆ
 
-                    winner = null; // ŸÒ‚ğƒŠƒZƒbƒg
+                    winner = null; // å‹è€…ã‚’ãƒªã‚»ãƒƒãƒˆ
 
                     GameSceneEvents.OnBeforeSceneChange?.Invoke(CurrentGameState);
                     SceneTransitionManager.Instance.LoadScene(_sceneState[CurrentGameState]);
                 }
                 else
                 {
-                    Debug.LogError("MainMenu‚ÌƒV[ƒ“‚ªİ’è‚³‚ê‚Ä‚¢‚Ü‚¹‚ñB");
+                    Debug.LogError("MainMenuã®ã‚·ãƒ¼ãƒ³ãŒè¨­å®šã•ã‚Œã¦ã„ã¾ã›ã‚“ã€‚");
                 }
                 break;
 
@@ -218,12 +225,12 @@ public class GameManager : MonoBehaviour
                     }
                     else
                     {
-                        Debug.LogError("LocalPreparation‚ÌƒV[ƒ“‚ªİ’è‚³‚ê‚Ä‚¢‚Ü‚¹‚ñB");
+                        Debug.LogError("LocalPreparationã®ã‚·ãƒ¼ãƒ³ãŒè¨­å®šã•ã‚Œã¦ã„ã¾ã›ã‚“ã€‚");
                     }
                 }
                 else
                 {
-                    Debug.LogWarning("ƒ[ƒJƒ‹€”õó‘Ô‚ÍƒƒCƒ“ƒƒjƒ…[‚©‚ç‚Ì‚İŠJn‚Å‚«‚Ü‚·B");
+                    Debug.LogWarning("ãƒ­ãƒ¼ã‚«ãƒ«æº–å‚™çŠ¶æ…‹ã¯ãƒ¡ã‚¤ãƒ³ãƒ¡ãƒ‹ãƒ¥ãƒ¼ã‹ã‚‰ã®ã¿é–‹å§‹ã§ãã¾ã™ã€‚");
                 }
                 break;
 
@@ -239,18 +246,19 @@ public class GameManager : MonoBehaviour
                     }
                     else
                     {
-                        Debug.LogError("LocalPlaying‚ÌƒV[ƒ“‚ªİ’è‚³‚ê‚Ä‚¢‚Ü‚¹‚ñB");
+                        Debug.LogError("LocalPlayingã®ã‚·ãƒ¼ãƒ³ãŒè¨­å®šã•ã‚Œã¦ã„ã¾ã›ã‚“ã€‚");
                     }
                 }
                 else
                 {
-                    Debug.LogWarning("ƒ[ƒJƒ‹ƒvƒŒƒCó‘Ô‚Íƒ[ƒJƒ‹€”õó‘Ô‚©‚ç‚Ì‚İŠJn‚Å‚«‚Ü‚·BQ‰ÁƒvƒŒƒCƒ„[‚ª2lˆÈã•K—v‚Å‚·B");
+                    Debug.LogWarning("ãƒ­ãƒ¼ã‚«ãƒ«ãƒ—ãƒ¬ã‚¤çŠ¶æ…‹ã¯ãƒ­ãƒ¼ã‚«ãƒ«æº–å‚™çŠ¶æ…‹ã‹ã‚‰ã®ã¿é–‹å§‹ã§ãã¾ã™ã€‚å‚åŠ ãƒ—ãƒ¬ã‚¤ãƒ¤ãƒ¼ãŒ2äººä»¥ä¸Šå¿…è¦ã§ã™ã€‚");
                 }
                 break;
 
 
             case GameState.OnlinePreparation:
-                if (CurrentGameState == GameState.MainMenu)
+                if (CurrentGameState == GameState.MainMenu || CurrentGameState == GameState.OnlineRoom)
+
                 {
                     if (_sceneState.ContainsKey(CurrentGameState))
                     {
@@ -261,12 +269,33 @@ public class GameManager : MonoBehaviour
                     }
                     else
                     {
-                        Debug.LogError("OnlinePreparation‚ÌƒV[ƒ“‚ªİ’è‚³‚ê‚Ä‚¢‚Ü‚¹‚ñB");
+                        Debug.LogError("OnlinePreparationã®ã‚·ãƒ¼ãƒ³ãŒè¨­å®šã•ã‚Œã¦ã„ã¾ã›ã‚“ã€‚");
                     }
                 }
                 else
                 {
-                    Debug.LogWarning("ƒIƒ“ƒ‰ƒCƒ“€”õó‘Ô‚ÍƒƒCƒ“ƒƒjƒ…[‚©‚ç‚Ì‚İŠJn‚Å‚«‚Ü‚·B");
+                    Debug.LogWarning("ã‚ªãƒ³ãƒ©ã‚¤ãƒ³æº–å‚™çŠ¶æ…‹ã¯MainMenu/OnlineRoomã‹ã‚‰ã®ã¿é–‹å§‹ã§ãã¾ã™ã€‚");
+                }
+                break;
+            case GameState.OnlineRoom:
+                if(CurrentGameState == GameState.OnlinePreparation)
+                {
+                    if (_sceneState.ContainsKey(CurrentGameState))
+                    {
+                        _previousGameState = CurrentGameState;
+                        CurrentGameState = GameState.OnlineRoom;
+                        GameSceneEvents.OnBeforeSceneChange?.Invoke(CurrentGameState);
+                        SceneTransitionManager.Instance.LoadScene(_sceneState[CurrentGameState]);
+                    }
+                    else
+                    {
+                        Debug.LogError("OnlineRoomã®ã‚·ãƒ¼ãƒ³ãŒè¨­å®šã•ã‚Œã¦ã„ã¾ã›ã‚“ã€‚");
+                    }
+                }
+                else
+                {
+                    Debug.LogWarning("OnlineRoomçŠ¶æ…‹ã¯OnlinePreparationã‹ã‚‰ã®ã¿é–‹å§‹ã§ãã¾ã™ã€‚");
+
                 }
                 break;
 
@@ -285,12 +314,12 @@ public class GameManager : MonoBehaviour
                     }
                     else
                     {
-                        Debug.LogError("LocalPlayingResults‚ÌƒV[ƒ“‚ªİ’è‚³‚ê‚Ä‚¢‚Ü‚¹‚ñB");
+                        Debug.LogError("LocalPlayingResultsã®ã‚·ãƒ¼ãƒ³ãŒè¨­å®šã•ã‚Œã¦ã„ã¾ã›ã‚“ã€‚");
                     }
                 }
                 else
                 {
-                    Debug.LogWarning("ƒ[ƒJƒ‹ƒvƒŒƒCŒ‹‰Êó‘Ô‚Íƒ[ƒJƒ‹ƒvƒŒƒCó‘Ô‚©‚ç‚Ì‚İŠJn‚Å‚«‚Ü‚·B");
+                    Debug.LogWarning("ãƒ­ãƒ¼ã‚«ãƒ«ãƒ—ãƒ¬ã‚¤çµæœçŠ¶æ…‹ã¯ãƒ­ãƒ¼ã‚«ãƒ«ãƒ—ãƒ¬ã‚¤çŠ¶æ…‹ã‹ã‚‰ã®ã¿é–‹å§‹ã§ãã¾ã™ã€‚");
                 }
                 break;
 
@@ -300,15 +329,15 @@ public class GameManager : MonoBehaviour
                 {
                     _previousGameState = CurrentGameState;
                     CurrentGameState = GameState.Quit;
-                    Application.Quit(); // ƒAƒvƒŠƒP[ƒVƒ‡ƒ“I—¹
+                    Application.Quit(); // ã‚¢ãƒ—ãƒªã‚±ãƒ¼ã‚·ãƒ§ãƒ³çµ‚äº†
                 }
                 else
                 {
-                    Debug.LogWarning("ƒQ[ƒ€‚Í‚·‚Å‚ÉI—¹‚µ‚Ä‚¢‚Ü‚·B");
+                    Debug.LogWarning("ã‚²ãƒ¼ãƒ ã¯ã™ã§ã«çµ‚äº†ã—ã¦ã„ã¾ã™ã€‚");
                 }
                 break;
             default:
-                Debug.LogWarning($"–¢‘Î‰‚ÌƒQ[ƒ€ó‘Ô: {state}");
+                Debug.LogWarning($"æœªå¯¾å¿œã®ã‚²ãƒ¼ãƒ çŠ¶æ…‹: {state}");
                 break;
 
         }
@@ -322,7 +351,7 @@ public class GameManager : MonoBehaviour
     {
         foreach (var player in joinedPlayers)
         {
-            player.Delete(); // Q‰ÁƒvƒŒƒCƒ„[‚ğíœ
+            player.Delete(); // å‚åŠ ãƒ—ãƒ¬ã‚¤ãƒ¤ãƒ¼ã‚’å‰Šé™¤
         }
         joinedPlayers.Clear();
     }
@@ -334,12 +363,12 @@ public class GameManager : MonoBehaviour
     private void SetMaxBulbCount(int count)
     {
         maxBulbCount = count;
-        Debug.Log($"Å‘å“d‹…”‚ğ{maxBulbCount}‚Éİ’è‚µ‚Ü‚µ‚½B");
+        Debug.Log($"æœ€å¤§é›»çƒæ•°ã‚’{maxBulbCount}ã«è¨­å®šã—ã¾ã—ãŸã€‚");
     }
     private void WinnerSetted(PlayerData data)
     {
         winner = data;
-        Debug.Log($"ŸÒ‚ªİ’è‚³‚ê‚Ü‚µ‚½: {winner.playerName}");
+        Debug.Log($"å‹è€…ãŒè¨­å®šã•ã‚Œã¾ã—ãŸ: {winner.playerName}");
         ChangeState(GameState.LocalPlayingResults);  
     }
     public PlayerData GetWinner()
