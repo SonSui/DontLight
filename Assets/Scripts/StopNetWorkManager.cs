@@ -4,7 +4,6 @@ using Unity.Netcode;
 
 public class StopNetWorkManager : MonoBehaviour
 {
-    public string returnSceneName;
     public RoomExitManager roomExitManager;
 
     private Button button;
@@ -22,27 +21,31 @@ public class StopNetWorkManager : MonoBehaviour
     {
         if (NetworkManager.Singleton == null)
         {
-            SceneTransitionManager.Instance.LoadScene(returnSceneName);
+            OnReturnToTitleSelected();
             return;
         }
 
         if (NetworkManager.Singleton.IsHost)
         {
-            Debug.Log("•€•π•»«–∂œ...");
-            roomExitManager.ForceClientToExitClientRpc(returnSceneName);
+            Debug.Log("ÉzÉXÉgêÿíf...");
+            roomExitManager.ForceClientToExitClientRpc();
             NetworkManager.Singleton.Shutdown();
-            SceneTransitionManager.Instance.LoadScene(returnSceneName);
+            OnReturnToTitleSelected();
         }
         else if (NetworkManager.Singleton.IsClient)
         {
-            Debug.Log("•Ø•È•§•¢•Û•»«–∂œ...");
+            Debug.Log("ÉNÉâÉCÉAÉìÉgèIóπ...");
             NetworkManager.Singleton.Shutdown();
-            SceneTransitionManager.Instance.LoadScene(returnSceneName);
+            OnReturnToTitleSelected();
         }
         else
         {
-            Debug.Log("•Õ•√•»•Ô©`•Ø§ÀΩ”æA§µ§Ï§∆§§§ §§");
-            SceneTransitionManager.Instance.LoadScene(returnSceneName);
+            OnReturnToTitleSelected();
         }
+    }
+
+    public void OnReturnToTitleSelected()
+    {
+        GameEvents.UIEvents.OnOnlineStart?.Invoke();
     }
 }

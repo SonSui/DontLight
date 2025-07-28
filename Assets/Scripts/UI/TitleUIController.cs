@@ -13,4 +13,6 @@ public class TitleUIController : MonoBehaviour
     public void OnLocalPlaySelected() => UIEvents.OnLocalStart?.Invoke();
     public void OnOnlinePlaySelected() => UIEvents.OnOnlineStart?.Invoke();
     public void OnExitGameSelected() => UIEvents.OnGameClose?.Invoke();
+
+    public void OnReturnToOnlineLobby() => UIEvents.OnGameStateChange?.Invoke(GameState.OnlinePreparation);
 }

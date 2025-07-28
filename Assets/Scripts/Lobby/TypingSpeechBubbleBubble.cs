@@ -1,5 +1,5 @@
 using UnityEngine;
-using UnityEngine.UI;
+using TMPro;
 
 public class TypingSpeechBubbleBubble : MonoBehaviour
 {
@@ -8,13 +8,13 @@ public class TypingSpeechBubbleBubble : MonoBehaviour
     public float dotInterval = 0.5f;
     public float pauseDuration = 1f;
 
-    private Text speachContent;
+    private TMP_Text speachContent;
     private int dotCount = 0;
     private float timer = 0f;
 
     void Start()
     {
-        speachContent = GetComponent<Text>();
+        speachContent = GetComponent<TMP_Text>();
         speachContent.text = baseText;
     }
 

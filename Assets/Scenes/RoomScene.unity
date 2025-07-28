@@ -1051,7 +1051,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 212994168}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 2117c14a94497cb4e84cf7839f6701f9, type: 3}
   m_Name: 
@@ -1540,7 +1540,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 76c392e42b5098c458856cdf6ecaaaa1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  m_FirstSelected: {fileID: 0}
+  m_FirstSelected: {fileID: 683168614}
   m_sendNavigationEvents: 1
   m_DragThreshold: 10
 --- !u!4 &265185183
@@ -2968,7 +2968,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 21300000, guid: a9130f45f106e9948934800ce209ce92, type: 3}
+  m_Sprite: {fileID: 21300000, guid: 5b8b44f2447315e4786826b0cd18f1e5, type: 3}
   m_Type: 0
   m_PreserveAspect: 0
   m_FillCenter: 1

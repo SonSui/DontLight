@@ -18,9 +18,7 @@ public class LobbyUIManager : MonoBehaviour
 
     void Start()
     {
-        createButton.onClick.AddListener(CreateRoom);
-
-        //backButton.onClick.AddListener(BackToTitle);
+        createButton.onClick.AddListener(OnOnlineRoomSelected);
         backButton.onClick.AddListener(OnReturnToTitleSelected);
 
         closeFullRoomButton.onClick.AddListener(() => ClosePop(fullRoom));
@@ -30,18 +28,6 @@ public class LobbyUIManager : MonoBehaviour
             OpenPop(disbandRoom);
             StaticEvents.Dissolution = false;
         }
-    }
-
-    public void CreateRoom()
-    {
-        StaticEvents.playerStat = "Host";
-        StaticEvents.hostIP = StaticEvents.GetLocalIPAddress();
-        SceneTransitionManager.Instance.LoadScene("RoomScene");
-    }
-
-    public void BackToTitle()
-    {
-        SceneTransitionManager.Instance.LoadScene("Title");
     }
 
     public void OpenFullRoomPop() {
@@ -96,9 +82,15 @@ public class LobbyUIManager : MonoBehaviour
         popUp.SetActive(false);
     }
 
+    public void OnOnlineRoomSelected()
+    {
+        StaticEvents.playerStat = "Host";
+        StaticEvents.hostIP = StaticEvents.GetLocalIPAddress();
+        GameEvents.UIEvents.OnOnlineRoomEnter?.Invoke();
+    }
+
     public void OnReturnToTitleSelected()
     {
         GameEvents.UIEvents.OnReturnToTitleScene?.Invoke();
     }
-
 }
