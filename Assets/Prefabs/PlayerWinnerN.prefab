@@ -68,7 +68,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 0, y: 0}
-  m_AnchoredPosition: {x: 0, y: -0.63}
+  m_AnchoredPosition: {x: 0, y: -1}
   m_SizeDelta: {x: 1, y: 1}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!223 &6077442653383361126
@@ -642,7 +642,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 0, y: 0}
-  m_AnchoredPosition: {x: 0, y: -0.93}
+  m_AnchoredPosition: {x: 0, y: -1}
   m_SizeDelta: {x: 1, y: 1}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!223 &845264076166807961
@@ -749,6 +749,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1537246418319121398}
+  - component: {fileID: 7160866487839460743}
   m_Layer: 0
   m_Name: Effects
   m_TagString: Untagged
@@ -773,6 +774,18 @@ Transform:
   - {fileID: 3576285456232200273}
   m_Father: {fileID: 6450544507179447417}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &7160866487839460743
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4346889380983359344}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 692304fb08a77c9469da1226e1541137, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &4450983378360389146
 GameObject:
   m_ObjectHideFlags: 0
@@ -950,6 +963,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2711eff94b08f5840bce575b106a24ae, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  lineColor:
+  - {r: 1, g: 1, b: 1, a: 0.78431374}
+  - {r: 1, g: 0, b: 0, a: 0.78431374}
   grenadePrefab: {fileID: 135388198100225501, guid: 5ebd151f707c8154faf3235dfbe711e5, type: 3}
   trajectoryPoints: 30
   timeStep: 0.1
@@ -1428,7 +1444,7 @@ GameObject:
   - component: {fileID: 8030638650483274889}
   - component: {fileID: 5824840661915623140}
   m_Layer: 7
-  m_Name: WinnerPlayerN
+  m_Name: PlayerWinnerN
   m_TagString: Player
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1444,7 +1460,7 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 1, z: 0, w: 0}
   m_LocalPosition: {x: 0, y: 0.102, z: 0}
-  m_LocalScale: {x: 2.5, y: 2.5, z: 2.5}
+  m_LocalScale: {x: 3, y: 3, z: 3}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 2236491250331383402}
@@ -1632,7 +1648,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d5a57f767e5e46a458fc5d3c628d0cbb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  GlobalObjectIdHash: 528893215
+  GlobalObjectIdHash: 2825150650
   InScenePlacedSourceGlobalObjectIdHash: 0
   DeferredDespawnTick: 0
   Ownership: 1
@@ -1709,8 +1725,8 @@ MonoBehaviour:
   damageEffect: {fileID: 5972895601153958419}
   damageEffectDuration: 0.5
   healEffect: {fileID: 3576285456232200278}
-  chargeDampingMax: 6
-  chargeDampingAmount: 1
+  chargeDampingMax: 8
+  chargeDampingAmount: 1.2
   chargeDampingRecoverAmount: 1
   flashlight: {fileID: 3964696288890778498}
   isFlashlightOn: 1

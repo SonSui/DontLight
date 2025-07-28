@@ -24,8 +24,9 @@ public class PlayerTestSon : MonoBehaviour
     public float chargeDampingRecoverAmount = 1f; // 充電の減少量の回復量
     private float currentBattery = 10f; // 初期電池残量
     public Flashlight flashlight; // フラッシュライトの参照
-    public bool isFlashlightOn = true; // フラッシュライトの状態
+    public bool isFlashlightOn = false; // フラッシュライトの状態
 
+    [Header("電球設定")]
     private float bulbCooldown = 5f; // 初期電球クールダウン時間
 
     [Header("プレイヤーの設定")]
@@ -74,7 +75,7 @@ public class PlayerTestSon : MonoBehaviour
         currentHP = maxHP; // 初期HPを最大HPに設定
         originMaxHP = playerData.maxHP; // 初期最大HPを保存
         currentBattery = playerData.battery; // 初期電池残量を設定
-        bulbCooldown = playerData.bulbCooldown; // 初期電球クールダウン時間を設定
+        bulbCooldown = 0f; // 初期電球クールダウン時間を設定
     }
     private void Start()
     {
@@ -135,6 +136,7 @@ public class PlayerTestSon : MonoBehaviour
             {
                 // 電球クールダウンが終了したらイベントを送信
                 GameEvents.PlayerEvents.OnBulbStateChanged?.Invoke(playerData.playerIndex, 1); // 1 = 電球使用可能
+                
             }
         }
         if(isFlashlightOn && flashlight != null)
@@ -249,6 +251,7 @@ public class PlayerTestSon : MonoBehaviour
         if (bulbCooldown > 0) return false; // 電球がクールダウン中なら投げられない
         bulbCooldown = playerData.bulbCooldown; // クールダウン時間をリセット
         GameEvents.PlayerEvents.OnBulbStateChanged?.Invoke(playerData.playerIndex, 0); // 0 = 電球ない
+        
         animatorMesh.SetTrigger("Attack"); // 電球を投げるアニメーションを再生
         return true; // 電球を投げることができた
     }

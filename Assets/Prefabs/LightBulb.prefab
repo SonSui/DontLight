@@ -80,7 +80,7 @@ MonoBehaviour:
   damagePerSecond: 1
   isDebug: 1
   bulbLight: {fileID: 7957784329532768979}
-  highSpeedThreshold: 0.3
+  highSpeedThreshold: 0.2
   highSpeedDamage: 5
   impactEffect2D: {fileID: 3002699331061793014, guid: f9fd4a27bcdb4c347a52b2905d852901, type: 3}
   highSpeedTime: 1.8
