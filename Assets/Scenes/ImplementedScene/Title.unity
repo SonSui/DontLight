@@ -1393,7 +1393,7 @@ MonoBehaviour:
     bgmName: Game
   - state: 6
     bgmName: Game
-  - state: 9
+  - state: 10
     bgmName: Result
   - state: 8
     bgmName: Result

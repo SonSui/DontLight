@@ -144,7 +144,8 @@ public class Bulb : MonoBehaviour
                 // 2Dヒットエフェクト生成
                 if (impactEffect2D != null)
                 {
-                    Vector3 spawnPos = collision.contacts[0].point;
+                    // Vector3 spawnPos = collision.contacts[0].point; // 衝突位置
+                    Vector3 spawnPos = collision.transform.position; // プレイヤーの位置を使用
                     Instantiate(impactEffect2D, spawnPos, Quaternion.identity);
                 }
             }
