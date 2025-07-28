@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using UnityEngine.EventSystems;
+
 using UnityEngine.UI;
 
 public class JoinRoomButton : MonoBehaviour
@@ -9,7 +10,9 @@ public class JoinRoomButton : MonoBehaviour
     private Button button;
 
 
+
     //EventSystem.current.SetSelectedGameObject(firstSelectedButton);
+
     void Awake()
     {
         button = GetComponent<Button>();
@@ -37,5 +40,5 @@ public class JoinRoomButton : MonoBehaviour
         this.roomIP = roomIP;
         this.playerNum = playerNum;
     }
-    
+
 }

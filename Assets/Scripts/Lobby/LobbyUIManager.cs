@@ -19,8 +19,10 @@ public class LobbyUIManager : MonoBehaviour
     void Start()
     {
         createButton.onClick.AddListener(CreateRoom);
+
         //backButton.onClick.AddListener(BackToTitle);
         backButton.onClick.AddListener(OnReturnToTitleSelected);
+
         closeFullRoomButton.onClick.AddListener(() => ClosePop(fullRoom));
         closeDisbandRoomButton.onClick.AddListener(() => ClosePop(disbandRoom));
 
@@ -93,8 +95,10 @@ public class LobbyUIManager : MonoBehaviour
         }
         popUp.SetActive(false);
     }
+
     public void OnReturnToTitleSelected()
     {
         GameEvents.UIEvents.OnReturnToTitleScene?.Invoke();
     }
+
 }

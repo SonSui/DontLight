@@ -193,9 +193,11 @@ public class LanRoomDiscovery : MonoBehaviour
                 if (joinButton != null)
                 {
                     Image buttonImage = joinButton.GetComponent<Image>();
+
                     //if (canJoin) buttonImage.sprite = greenSprite;
                     //else buttonImage.sprite = redSprite;
                     //joinButton.GetComponent<Button>()
+
                     joinButton.SetInformation(roomIP, activeCount);
                 }
                 firstChild.gameObject.SetActive(true);
