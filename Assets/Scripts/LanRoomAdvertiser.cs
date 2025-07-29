@@ -38,7 +38,7 @@ public class LanRoomAdvertiser : MonoBehaviour
         IPEndPoint endPoint = new IPEndPoint(IPAddress.Broadcast, 8888);
         udpSender.Send(data, data.Length, endPoint);
 
-        // Debug.Log("📡 ルーム情報を放送開始：" + roomInfo);
+        //Debug.Log("📡 ルーム情報を放送開始：" + roomInfo);
     }
 
     void OnDestroy()

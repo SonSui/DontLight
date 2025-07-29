@@ -1,14 +1,15 @@
 using System.Collections.Generic;
+using Unity.Netcode;
 using UnityEngine;
 using UnityEngine.UI;
 
 [RequireComponent(typeof(LineRenderer))]
-public class SpawnGrenade : MonoBehaviour
+public class SpawnGrenadeNetWork : MonoBehaviour
 {
     private Camera mainCamera;
     private LineRenderer lineRenderer;
     private bool canThrow = true;
-    public Color[] lineColor; 
+    public Color[] lineColor;
 
     // グレネードのプレハブ
     // Grenade prefab
@@ -74,7 +75,7 @@ public class SpawnGrenade : MonoBehaviour
 
     private void Awake()
     {
-        if(lineColor.Length < 2)
+        if (lineColor.Length < 2)
         {
             lineColor = new Color[2] {
                 Color.white, // 投擲可能時の色
@@ -226,13 +227,19 @@ public class SpawnGrenade : MonoBehaviour
             }
         }
 
-        ThrowGrenade(cachedVelocity);
+        Debug.Log("SpawnGrenadeNetWork cachedVelocity:" + cachedVelocity);
+        //ThrowGrenade(cachedVelocity);
         return true;
     }
 
     public Vector3 GetCachedVelocity()
     {
         return cachedVelocity;
+    }
+
+    public Vector3 GetThrowPosition()
+    {
+        return transform.position;
     }
 
     public void LockToNextTarget()
@@ -359,21 +366,21 @@ public class SpawnGrenade : MonoBehaviour
         // 设置是否可以投掷
         this.canThrow = canThrow;
         if (lineRenderer != null)
-        lineRenderer.colorGradient = canThrow ? new Gradient
-        {
-            colorKeys = new GradientColorKey[]
+            lineRenderer.colorGradient = canThrow ? new Gradient
             {
+                colorKeys = new GradientColorKey[]
+                {
                 new GradientColorKey(lineColor[0], 0f),
                 new GradientColorKey(lineColor[0], 1f)
-            }
-        } : new Gradient
-        {
-            colorKeys = new GradientColorKey[]
+                }
+            } : new Gradient
             {
+                colorKeys = new GradientColorKey[]
+                {
                 new GradientColorKey(lineColor[1], 0f),
                 new GradientColorKey(lineColor[1], 1f)
-            }
-        };
+                }
+            };
 
         if (rangeIndicatorImage != null)
         {

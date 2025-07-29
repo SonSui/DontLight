@@ -1,11 +1,11 @@
 ﻿using Unity.Netcode;
 using Unity.Netcode.Transports.UTP;
 using UnityEngine;
-using UnityEngine.InputSystem;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Sockets;
 using System.Net;
+using UnityEngine.InputSystem;
 
 public class RoomLANConfig : NetworkBehaviour
 {
@@ -15,10 +15,9 @@ public class RoomLANConfig : NetworkBehaviour
     [Header("Spawn Positions")]
     public List<Transform> spawnPoints;
 
-    [Header("Prefab")]
-    public GameObject playerPrefab;
+    [Header("Spawn Positions")]
+    public GameObject InputOnlyPlayer;
 
-    Dictionary<GameObject, PlayerData> playerMap;
     private string playerStat;
 
     private void Start()
@@ -80,16 +79,10 @@ public class RoomLANConfig : NetworkBehaviour
         if (NetworkManager.Singleton.IsServer)
         {
             int spawnIndex = NetworkManager.Singleton.ConnectedClients.Count - 1;
-
-
-
-
-
-
             if (spawnIndex < spawnPoints.Count)
             {
                 MovePlayerToSpawnPosition(clientId, spawnIndex);
-                MovePlayerClientRpc(clientId, spawnPoints[spawnIndex].position);
+                MovePlayerClientRpc(clientId, spawnIndex);
             }
             else
             {
@@ -97,15 +90,7 @@ public class RoomLANConfig : NetworkBehaviour
                 GameEvents.UIEvents.OnOnlineStart?.Invoke();
             }
         }
-    }
-
-    [ClientRpc]
-    private void MovePlayerClientRpc(ulong clientId, Vector3 position)
-    {
-        if (NetworkManager.Singleton.LocalClientId == clientId)
-        {
-            NetworkManager.Singleton.SpawnManager.GetPlayerNetworkObject(clientId).transform.position = position;
-        }
+        Debug.Log("Owner ID = " + NetworkObject.OwnerClientId + ", IsOwner = " + IsOwner);
     }
 
     private void MovePlayerToSpawnPosition(ulong clientId, int spawnIndex)
@@ -116,6 +101,46 @@ public class RoomLANConfig : NetworkBehaviour
             if (playerObject != null)
             {
                 playerObject.transform.position = spawnPoints[spawnIndex].position;
+
+                PlayerData playerData = new PlayerData();
+                playerData.playerIndex = spawnIndex;
+                playerData.playerName = IsServer ? StaticEvents.hostIP : StaticEvents.clientIP; // 统一由服务器决定
+                playerData.playerColor = GameManager.Instance.playerColors[spawnIndex % GameManager.Instance.playerColors.Count];
+
+                var input = playerObject.GetComponent<PlayerInput>();
+                playerData.input = input;
+                playerData.devices = new List<InputDevice>(input.devices);
+                playerData.controlScheme = input.currentControlScheme;
+
+                // 让服务器同步数据
+                playerObject.GetComponent<PlayerTestSon>().SetPlayerData(playerData);
+            }
+        }
+    }
+
+    [ClientRpc]
+    private void MovePlayerClientRpc(ulong clientId, int spawnIndex)
+    {
+        if (NetworkManager.Singleton.LocalClientId == clientId)
+        {
+            var playerObject = NetworkManager.Singleton.SpawnManager.GetPlayerNetworkObject(clientId);
+            if (playerObject != null)
+            {
+                playerObject.transform.position = spawnPoints[spawnIndex].position;
+                // 不再在客户端设置 PlayerData，而是等待服务器同步
+
+                PlayerData playerData = new PlayerData();
+                playerData.playerIndex = spawnIndex;
+                playerData.playerName = IsServer ? StaticEvents.hostIP : StaticEvents.clientIP; // 统一由服务器决定
+                playerData.playerColor = GameManager.Instance.playerColors[spawnIndex % GameManager.Instance.playerColors.Count];
+
+                var input = playerObject.GetComponent<PlayerInput>();
+                playerData.input = input;
+                playerData.devices = new List<InputDevice>(input.devices);
+                playerData.controlScheme = input.currentControlScheme;
+
+                // 让服务器同步数据
+                playerObject.GetComponent<PlayerTestSon>().SetPlayerData(playerData);
             }
         }
     }
