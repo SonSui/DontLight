@@ -60,7 +60,7 @@ public class MapGenerator : MonoBehaviour
 
                 if (tile - 1 >= TilePrefabs.Count)
                 {
-                    Debug.LogWarning($"TilePrefabsの数を超えたID：{tile}");
+                    Debug.Log($"TilePrefabsの数を超えたID：{tile}");
                     continue;
                 }
 
