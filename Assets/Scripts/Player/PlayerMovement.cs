@@ -394,11 +394,6 @@ public class PlayerMovement : MonoBehaviour
         // 按下充电键时给手电筒充电
         if (playerParams == null || !playerParams.BatteryCharge())
             return;
-        moveSpeed = oriMoveSpeed * chargeMoveSpeedRate;
-
-        // 懐中電灯の充電処理
-        if (playerParams == null || !playerParams.BatteryCharge())
-            return;
 
         // 成功したら移動速度を80%にし、既存の回復処理をキャンセルしてリセット
         moveSpeed = oriMoveSpeed * chargeMoveSpeedRate;
