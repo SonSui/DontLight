@@ -1763,9 +1763,16 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   inputActions: {fileID: -944628639613478452, guid: 052faaac586de48259a63d0c4782560b, type: 3}
   moveSpeed: 5
+  chargeMoveSpeedRate: 0.8
+  speedDownDuration: 0.3
   rotateSpeed: 5
   GamepadDeadZone: 0.1
   grenadeThrower: {fileID: 4306944721514377069}
+  enemyLayer:
+    serializedVersion: 2
+    m_Bits: 128
+  autoLockRange: 5
+  lockBreakDeadzone: 0.15
   playerParams: {fileID: 5400428340969232972}
 --- !u!82 &5824840661915623140
 AudioSource:

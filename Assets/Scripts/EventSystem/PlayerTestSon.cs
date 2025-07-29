@@ -234,15 +234,16 @@ public class PlayerTestSon : MonoBehaviour
         flashlight.ToggleFlashlight(isFlashlightOn);
     }
 
-    public void BatteryCharge(float amount = 1f)
+    public bool BatteryCharge(float amount = 1f)
     {
-        if (isDying) return; // 死亡中のプレイヤーは充電できない
-        if (currentBattery >= playerData.battery) return; // 電池が満タンなら何もしない
+        if (isDying) return false; // 死亡中のプレイヤーは充電できない
+        if (currentBattery >= playerData.battery) return false; // 電池が満タンなら何もしない
         currentBattery += (amount/chargeDamping);
         chargeDamping += chargeDampingAmount; // 充電の減少量を増加
         chargeDamping = Mathf.Min(chargeDamping, chargeDampingMax); // 最大充電減少量を超えないようにする
         currentBattery = Mathf.Min(currentBattery, playerData.battery); // 最大電池残量を超えないようにする
         GameEvents.PlayerEvents.OnBatteryChanged?.Invoke(playerData.playerIndex, currentBattery, true); // 電池更新イベントを送信
+        return true; // 充電に成功した場合はtrueを返す
     }
 
     public bool ThrowBulb()
