@@ -1,10 +1,11 @@
-using Unity.Netcode;
+﻿using Unity.Netcode;
 using Unity.Netcode.Transports.UTP;
 using UnityEngine;
-using System.Linq;
-using System.Net;
-using System.Net.Sockets;
+using UnityEngine.InputSystem;
 using System.Collections.Generic;
+using System.Linq;
+using System.Net.Sockets;
+using System.Net;
 
 public class RoomLANConfig : NetworkBehaviour
 {
@@ -12,14 +13,12 @@ public class RoomLANConfig : NetworkBehaviour
     public ushort port = 7777;
 
     [Header("Spawn Positions")]
-    public List<Vector3> spawnPositions = new List<Vector3>()
-    {
-        new Vector3(-5, 0, 0),
-        new Vector3(5, 0, 0),
-        new Vector3(0, 0, 5),
-        new Vector3(0, 0, -5)
-    };
+    public List<Transform> spawnPoints;
 
+    [Header("Prefab")]
+    public GameObject playerPrefab;
+
+    Dictionary<GameObject, PlayerData> playerMap;
     private string playerStat;
 
     private void Start()
@@ -70,7 +69,7 @@ public class RoomLANConfig : NetworkBehaviour
     public void StartClient()
     {
         string ip = StaticEvents.hostIP;
-        if (string.IsNullOrEmpty(ip))return;
+        if (string.IsNullOrEmpty(ip)) return;
         ConfigureTransportForClient(ip);
         bool success = NetworkManager.Singleton.StartClient();
         Debug.Log($"{ip}:{port}" + success);
@@ -81,15 +80,21 @@ public class RoomLANConfig : NetworkBehaviour
         if (NetworkManager.Singleton.IsServer)
         {
             int spawnIndex = NetworkManager.Singleton.ConnectedClients.Count - 1;
-            if (spawnIndex < spawnPositions.Count)
+
+
+
+
+
+
+            if (spawnIndex < spawnPoints.Count)
             {
                 MovePlayerToSpawnPosition(clientId, spawnIndex);
-                MovePlayerClientRpc(clientId, spawnPositions[spawnIndex]);
+                MovePlayerClientRpc(clientId, spawnPoints[spawnIndex].position);
             }
             else
             {
                 Debug.LogWarning("Spawn index out of range. Not moving player.");
-                SceneTransitionManager.Instance.LoadScene("LobbyScene");
+                GameEvents.UIEvents.OnOnlineStart?.Invoke();
             }
         }
     }
@@ -105,12 +110,12 @@ public class RoomLANConfig : NetworkBehaviour
 
     private void MovePlayerToSpawnPosition(ulong clientId, int spawnIndex)
     {
-        if (spawnIndex >= 0 && spawnIndex < spawnPositions.Count)
+        if (spawnIndex >= 0 && spawnIndex < spawnPoints.Count)
         {
             var playerObject = NetworkManager.Singleton.SpawnManager.GetPlayerNetworkObject(clientId);
             if (playerObject != null)
             {
-                playerObject.transform.position = spawnPositions[spawnIndex];
+                playerObject.transform.position = spawnPoints[spawnIndex].position;
             }
         }
     }
