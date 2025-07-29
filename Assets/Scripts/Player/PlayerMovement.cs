@@ -1,5 +1,7 @@
 using UnityEngine;
 using UnityEngine.InputSystem;
+using DG.Tweening;
+using System.Collections.Generic;
 
 [RequireComponent(typeof(PlayerInput))]
 public class PlayerMovement : MonoBehaviour
@@ -37,6 +39,9 @@ public class PlayerMovement : MonoBehaviour
     // Movement speed
     // 移动速度
     [SerializeField] private float moveSpeed = 5f;
+    [SerializeField] private float chargeMoveSpeedRate = 0.8f;
+    [SerializeField] private float speedDownDuration = 0.3f; // 移動速度ダウンの時間
+    private float oriMoveSpeed = 5f;
 
     // 回転速度
     // Rotation speed
@@ -58,10 +63,24 @@ public class PlayerMovement : MonoBehaviour
     // 手榴弹投掷逻辑的引用
     [SerializeField] private SpawnGrenade grenadeThrower;
 
+
+    [SerializeField] private LayerMask enemyLayer;
+    [SerializeField] private float autoLockRange = 5f;
+    [SerializeField] private float lockBreakDeadzone = 0.15f;
+
+    private List<Transform> lockTargets = new List<Transform>();
+    private int lockTargetIndex = 0;
+    private Transform currentLockTarget = null;
+
+
     // プレイヤーのパラメータ
     // Player parameters
     // 玩家参数
     [SerializeField] private PlayerTestSon playerParams;
+
+    private Tween speedRecoverTween;
+
+
 
     private void Awake()
     {
@@ -89,6 +108,8 @@ public class PlayerMovement : MonoBehaviour
         toggleAction.performed += OnToggle;
 
         playerInput.onControlsChanged += OnDeviceChange;
+
+        oriMoveSpeed = moveSpeed;
     }
 
     private void OnDisable()
@@ -128,6 +149,21 @@ public class PlayerMovement : MonoBehaviour
 
         grenadeThrower.SetLookInput(lookInput);
         grenadeThrower.SetCanThrow(playerParams.CanThrowBulb());
+
+        if (isGampadConnected)
+        {
+            if (lookInput.magnitude > lockBreakDeadzone)
+            {
+                currentLockTarget = null; // プレイヤーが操作したら解除
+            }
+            else
+            {
+                if (currentLockTarget == null)
+                {
+                    UpdateLockTarget();
+                }
+            }
+        }
     }
 
     private void FixedUpdate()
@@ -175,7 +211,7 @@ public class PlayerMovement : MonoBehaviour
         // スティック入力があるかチェック
         // Check if stick input is beyond deadzone
         // 判断摇杆输入是否超过死区
-        if (Mathf.Abs(lookInput.x) > GamepadDeadZone || Mathf.Abs(lookInput.y) > GamepadDeadZone)
+        /*if (Mathf.Abs(lookInput.x) > GamepadDeadZone || Mathf.Abs(lookInput.y) > GamepadDeadZone)
         {
             Vector3 playerDirection = Vector3.right * lookInput.x + Vector3.forward * lookInput.y;
 
@@ -184,6 +220,25 @@ public class PlayerMovement : MonoBehaviour
                 // プレイヤーの向きを回転させる
                 // Rotate player toward stick direction
                 // 向手柄方向平滑旋转
+                Quaternion targetRotation = Quaternion.LookRotation(playerDirection, Vector3.up);
+                transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, rotateSpeed * Time.deltaTime);
+            }
+        }*/
+        if (currentLockTarget != null)
+        {
+            Vector3 dir = currentLockTarget.position - transform.position;
+            dir.y = 0;
+            if (dir.sqrMagnitude > 0.01f)
+            {
+                Quaternion targetRotation = Quaternion.LookRotation(dir.normalized, Vector3.up);
+                transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, rotateSpeed * Time.deltaTime);
+            }
+        }
+        else if (lookInput.magnitude > GamepadDeadZone)
+        {
+            Vector3 playerDirection = new Vector3(lookInput.x, 0, lookInput.y);
+            if (playerDirection.sqrMagnitude > 0.01f)
+            {
                 Quaternion targetRotation = Quaternion.LookRotation(playerDirection, Vector3.up);
                 transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, rotateSpeed * Time.deltaTime);
             }
@@ -249,6 +304,40 @@ public class PlayerMovement : MonoBehaviour
         {
             grenadeThrower.LockToNextTarget();
         }
+        if (currentLockTarget != null && lockTargets.Count > 1)
+        {
+            lockTargetIndex = (lockTargetIndex + 1) % lockTargets.Count;
+            currentLockTarget = lockTargets[lockTargetIndex];
+        }
+    }
+
+    private void UpdateLockTarget()
+    {
+        Collider[] hits = Physics.OverlapSphere(transform.position, autoLockRange, enemyLayer);
+        lockTargets.Clear();
+
+        foreach (Collider hit in hits)
+        {
+            var enemy = hit.GetComponentInParent<PlayerTestSon>();
+            if (enemy != null && enemy.transform != this.transform)
+            {
+                lockTargets.Add(enemy.transform);
+            }
+        }
+
+        if (lockTargets.Count > 0)
+        {
+            lockTargets.Sort((a, b) =>
+                Vector3.Distance(transform.position, a.position).CompareTo(
+                Vector3.Distance(transform.position, b.position)));
+
+            lockTargetIndex = 0;
+            currentLockTarget = lockTargets[0];
+        }
+        else
+        {
+            currentLockTarget = null;
+        }
     }
 
     private void OnThrowCanceled(InputAction.CallbackContext ctx)
@@ -284,6 +373,10 @@ public class PlayerMovement : MonoBehaviour
         {
             playerInput.onControlsChanged -= OnDeviceChange;
         }
+        if (speedRecoverTween != null && speedRecoverTween.IsActive())
+        {
+            speedRecoverTween.Kill();
+        }
     }
 
     private void OnThrowCanceledManually(InputAction.CallbackContext ctx)
@@ -299,7 +392,29 @@ public class PlayerMovement : MonoBehaviour
         // 懐中電灯の充電処理
         // Recharge flashlight when button pressed
         // 按下充电键时给手电筒充电
-        playerParams?.BatteryCharge();
+        if (playerParams == null || !playerParams.BatteryCharge())
+            return;
+        moveSpeed = oriMoveSpeed * chargeMoveSpeedRate;
+
+        // 懐中電灯の充電処理
+        if (playerParams == null || !playerParams.BatteryCharge())
+            return;
+
+        // 成功したら移動速度を80%にし、既存の回復処理をキャンセルしてリセット
+        moveSpeed = oriMoveSpeed * chargeMoveSpeedRate;
+
+        // 既存のTweenがあればKillしてリセット（充電連打に対応）
+        if (speedRecoverTween != null && speedRecoverTween.IsActive())
+        {
+            speedRecoverTween.Kill();
+        }
+
+        // 指定時間後に速度を元に戻すTween
+        speedRecoverTween = DOVirtual.DelayedCall(speedDownDuration, () =>
+        {
+            moveSpeed = oriMoveSpeed;
+        });
+
     }
 
     private void OnToggle(InputAction.CallbackContext ctx)
@@ -309,4 +424,5 @@ public class PlayerMovement : MonoBehaviour
         // 切换手电筒开关状态
         playerParams?.ToggleFlashlight();
     }
+    
 }
