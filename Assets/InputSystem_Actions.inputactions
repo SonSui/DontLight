@@ -420,6 +420,17 @@
                 },
                 {
                     "name": "",
+                    "id": "0854bafc-d7fe-4b0a-ac26-c78a4084db4b",
+                    "path": "<Gamepad>/buttonWest",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Charging",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
                     "id": "ccbae792-2e87-4dfd-85ef-5a0326262d1a",
                     "path": "<Mouse>/rightButton",
                     "interactions": "",

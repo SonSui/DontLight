@@ -1763,7 +1763,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   inputActions: {fileID: -944628639613478452, guid: 052faaac586de48259a63d0c4782560b, type: 3}
   moveSpeed: 5
-  chargeMoveSpeedRate: 0.8
+  chargeMoveSpeedRate: 0.6
   speedDownDuration: 0.3
   rotateSpeed: 5
   GamepadDeadZone: 0.1
