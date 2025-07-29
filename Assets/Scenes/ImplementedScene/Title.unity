@@ -1370,13 +1370,13 @@ MonoBehaviour:
   soundList:
   - name: Title
     audioClip: {fileID: 8300000, guid: b656a98a90f8bbb4c968b1a391562035, type: 3}
-    volume: 0.55
+    volume: 1
   - name: Game
     audioClip: {fileID: 8300000, guid: b03c4ff6056462f46830cfec4cbe5bbd, type: 3}
-    volume: 0.55
+    volume: 0.8
   - name: Result
     audioClip: {fileID: 8300000, guid: 7e8100a87b890794baa4d3f7e83b13f6, type: 3}
-    volume: 0.55
+    volume: 0.8
   audioSource: {fileID: 346727930}
   bgmMappings:
   - state: 0
