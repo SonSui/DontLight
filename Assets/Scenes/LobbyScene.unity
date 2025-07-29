@@ -410,6 +410,7 @@ GameObject:
   m_Component:
   - component: {fileID: 268162544}
   - component: {fileID: 268162543}
+  - component: {fileID: 268162545}
   m_Layer: 0
   m_Name: LobbyUIManager
   m_TagString: Untagged
@@ -450,6 +451,24 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &268162545
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 268162542}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ce271168467c24943b47225d9d0b906c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  soundClips:
+  - {fileID: 8300000, guid: 648227a0850c03f4fa231f56d0bbc885, type: 3}
+  - {fileID: 8300000, guid: 88d6bfb5d9a31b04bbe7080a2d580d2d, type: 3}
+  - {fileID: 8300000, guid: 861d55a3c436bac4da7909140b88234b, type: 3}
+  minDelay: 5
+  maxDelay: 10
 --- !u!1 &269224072
 GameObject:
   m_ObjectHideFlags: 0
