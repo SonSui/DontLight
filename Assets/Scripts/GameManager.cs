@@ -122,6 +122,13 @@ public class GameManager : MonoBehaviour
             GameSceneEvents.OnBeforeSceneChange?.Invoke(CurrentGameState);
         });
     }
+    void Update()
+    {
+        if(Input.GetKeyDown(KeyCode.Escape))
+        {
+            HandleGameQuit();
+        }
+    }
 
     public void RegisterPlayer(InputOnlyPlayer player)
     {
