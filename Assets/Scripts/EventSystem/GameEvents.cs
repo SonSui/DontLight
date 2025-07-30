@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 //using UnityEditor.PackageManager;
 using UnityEngine;
-using UnityEngine.InputSystem.Users;
 using UnityEngine.InputSystem;
 
 public struct DamageInfo
@@ -11,6 +10,7 @@ public struct DamageInfo
     public float damage;        // 受けたダメージ量
     public Vector3 hitPoint;    // ダメージを受けた位置
 }
+
 [System.Serializable]
 public class PlayerData
 {
