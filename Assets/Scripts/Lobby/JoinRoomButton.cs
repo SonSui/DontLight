@@ -37,6 +37,7 @@ public class JoinRoomButton : MonoBehaviour
     {
         StaticEvents.playerStat = "Client";
         StaticEvents.hostIP = roomIP;
+        StaticEvents.clientIP = "test";
         GameEvents.UIEvents.OnOnlineRoomEnter?.Invoke();
     }
 }
