@@ -1,21 +1,19 @@
 ﻿using System.Net;
 using System.Net.Sockets;
 using System.Text;
+using Unity.Netcode;
 using UnityEngine;
-using UnityEngine.InputSystem;
 
 public class LanRoomAdvertiser : MonoBehaviour
 {
-    private UdpClient udpSender;
-    private float broadcastInterval = 1f;
     private float timer = 0f;
-    private int num = 0;
+    private float broadcastInterval = 1f;
     private string playerStat;
+    private UdpClient udpSender;
 
     void Start()
     {
         playerStat = StaticEvents.playerStat;
-        Debug.Log("LanRoomAdvertiser playerStat : " + playerStat);
         udpSender = new UdpClient();
         udpSender.EnableBroadcast = true;
     }
@@ -33,15 +31,14 @@ public class LanRoomAdvertiser : MonoBehaviour
 
     void BroadcastRoomInfo()
     {
-        num++;
-        //string roomInfo = "ROOM_INFO|房间A|人数:" + num + "/4|IP:" + StaticEvents.hostIP;
-        string roomInfo = "roomName=Room" + StaticEvents.hostIP + ";playerNum=" + num;
+        int currentPlayerNum = NetworkManager.Singleton.ConnectedClients.Count;
+        string roomInfo = "roomName=墓地" + StaticEvents.hostIP + ";roomStat=preparation;gameMap=1;playerNum=" + currentPlayerNum;
         byte[] data = Encoding.UTF8.GetBytes(roomInfo);
 
         IPEndPoint endPoint = new IPEndPoint(IPAddress.Broadcast, 8888);
         udpSender.Send(data, data.Length, endPoint);
 
-        Debug.Log("📡 已广播房间信息：" + roomInfo);
+        //Debug.Log("📡 ルーム情報を放送開始：" + roomInfo);
     }
 
     void OnDestroy()

@@ -1,36 +1,40 @@
-using System.Collections.Generic;
+ï»¿using System.Collections.Generic;
 using UnityEngine;
 
 public class MapGenerator : MonoBehaviour
 {
-    public List<GameObject> MapPrefabs;
+    public List<GameObject> MapPrefabs,TilePrefabs;
 
     private int[,] mapData;
+    private int[,] tileData;
 
-    // ƒ}ƒbƒv‚ÌƒXƒ^[ƒgˆÊ’ui¶ã‚ÌŠî€“_‚È‚Çj
+    // ãƒãƒƒãƒ—ã®ã‚¹ã‚¿ãƒ¼ãƒˆä½ç½®ï¼ˆå·¦ä¸Šã®åŸºæº–ç‚¹ãªã©ï¼‰
     public Vector3 mapOrigin = new Vector3(-25f, 0.5f, 0f);
-    public GameObject mapParent; //¶¬•¨‚ÌeƒIƒuƒWƒFƒNƒg ‚±‚ê‚ª‚È‚¢‚ÆƒqƒGƒ‰ƒ‹ƒL[‚ªŒ©‚Ã‚ç‚¢
+    public GameObject mapParent; // ç”Ÿæˆç‰©ã®è¦ªã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆ
+
+    public TextAsset mapTextFile,tileTextFile;
+
     private void Start()
     {
-        LoadMapDataFromText("map"); // Resources/map.txt
-        GenerateMap();
-    }
-
-    void LoadMapDataFromText(string fileName)
-    {
-        TextAsset textAsset = Resources.Load<TextAsset>(fileName);
-
-        if (textAsset == null)
+        if (mapTextFile == null || tileTextFile == null)
         {
-            Debug.LogError("ƒ}ƒbƒvƒtƒ@ƒCƒ‹‚ªŒ©‚Â‚©‚è‚Ü‚¹‚ñ: " + fileName);
+            Debug.LogError("ãƒãƒƒãƒ—ãƒ†ã‚­ã‚¹ãƒˆãƒ•ã‚¡ã‚¤ãƒ«ãŒæŒ‡å®šã•ã‚Œã¦ã„ã¾ã›ã‚“ã€‚");
             return;
         }
+        mapData = LoadMapDataFromTextAsset(mapTextFile); 
+        tileData = LoadMapDataFromTextAsset(tileTextFile);
 
-        string[] lines = textAsset.text.Split('\n');
+        GenerateObjectMap();
+        GenerateTileMap();
+    }
+
+    int[,] LoadMapDataFromTextAsset(TextAsset textAsset)
+    {
+        string[] lines = textAsset.text.Split(new[] { '\r', '\n' }, System.StringSplitOptions.RemoveEmptyEntries);
         int height = lines.Length;
         int width = lines[0].Trim().Length;
 
-        mapData = new int[height, width];
+        int[,] result = new int[height, width];
 
         for (int z = 0; z < height; z++)
         {
@@ -38,28 +42,74 @@ public class MapGenerator : MonoBehaviour
             for (int x = 0; x < width; x++)
             {
                 char c = line[x];
-                mapData[z, x] = c - '0';
+                result[z, x] = c - '0';
+            }
+        }
+
+        return result;
+    }
+
+    void GenerateTileMap()
+    {
+        for (int z = 0; z < tileData.GetLength(0); z++)
+        {
+            for (int x = 0; x < tileData.GetLength(1); x++)
+            {
+                int tile = tileData[z, x];
+                if (tile == 0) continue;
+
+                if (tile - 1 >= TilePrefabs.Count)
+                {
+                    Debug.Log($"TilePrefabsã®æ•°ã‚’è¶…ãˆãŸIDï¼š{tile}");
+                    continue;
+                }
+
+                GameObject prefab = TilePrefabs[tile - 1];
+                Vector3 pos = new Vector3(
+                    mapOrigin.x + x * 3f - 10f,//ä½ç½®ã‚‚ã‚¹ã‚±ãƒ¼ãƒ«ã«åˆã‚ã›ã¦èª¿æ•´
+                    0f,
+                    mapOrigin.z - z * 3f + 3f
+                );
+
+                GameObject obj = Instantiate(prefab, pos, prefab.transform.rotation);
+
+                //Yã¯ãã®ã¾ã¾ã€é«˜ã•ç¶­æŒ
+                obj.transform.localScale = new Vector3(3f, 1f, 3f);
+
+                obj.transform.parent = mapParent.transform;
             }
         }
     }
-
-    void GenerateMap()
+    void GenerateObjectMap()
     {
         for (int z = 0; z < mapData.GetLength(0); z++)
         {
             for (int x = 0; x < mapData.GetLength(1); x++)
             {
-                if (mapData[z, x] != 0)
+                int tile = mapData[z, x];
+                if (tile == 0) continue;
+
+                if (tile - 1 >= MapPrefabs.Count)
                 {
-                    GameObject prefab = MapPrefabs[mapData[z, x] - 1];
-                    Vector3 pos = new Vector3(
-                        mapOrigin.x - x,
-                        mapOrigin.y,
-                        mapOrigin.z + z
-                    );
-                    GameObject obj = Instantiate(prefab, pos, prefab.transform.rotation);
-                    obj.transform.parent = mapParent.transform;
+                    Debug.LogWarning($"MapPrefabsã®æ•°ã‚’è¶…ãˆãŸIDï¼š{tile}");
+                    continue;
                 }
+
+                GameObject prefab = MapPrefabs[tile - 1];
+                Vector3 basePos = new Vector3(
+                    mapOrigin.x + x,
+                    mapOrigin.y,
+                    mapOrigin.z - z
+                );
+
+                Vector3 offset = Vector3.zero;
+                //if (tile == 3) offset = new Vector3(0.4f, 0f, 0f);
+                //if (tile == 4) offset = new Vector3(-0.2f, 0f, 0f);
+                if (tile == 5) offset = new Vector3(-0.2f, 0f, 0.2f);
+                if (tile == 6) offset = new Vector3(0.1f, 0f, 0.4f);
+
+                GameObject obj = Instantiate(prefab, basePos + offset, prefab.transform.rotation);
+                obj.transform.parent = mapParent.transform;
             }
         }
     }
