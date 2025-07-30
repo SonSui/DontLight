@@ -15,14 +15,15 @@ public class BatteryUI : MonoBehaviour
     public GameObject frame; // バッテリーUIのフレーム
     public GameObject decorate; // バッテリーUIの装飾
     private Image thunder; // バッテリーUIのサンダー画像コンポーネント
-    public Color fullColor = Color.white; // バッテリーが満タンのときの色
+    public Color fullColor = Color.yellow; // バッテリーが満タンのときの色
     public Color emptyColor = Color.red; // バッテリーが空のときの色
+    public Color normalColor = Color.white; // バッテリーが通常のときの色
 
     private float minFillLength = 56f; // 最小フィルの長さ（バッテリーUIが完全に空でない場合の最小値）
 
     public float fillDuration = 0.1f; // バッテリーUIのフィルが変化する時間
-    private float currentBattery = 100f; // 現在のバッテリー残量
-    private float maxBattery = 100f; // 最大バッテリー残量
+    private float currentBattery = 10f; // 現在のバッテリー残量
+    private float maxBattery = 10f; // 最大バッテリー残量
     private Tween batteryTween; // バッテリーUIのフィルが変化するTween
     private bool isCharging = false; // バッテリーが充電中かどうか
     private Tween effectTween;
@@ -101,9 +102,13 @@ public class BatteryUI : MonoBehaviour
         }
 
 
-        if (currentBattery > maxBattery * 0.1f)
+        if (currentBattery > maxBattery * 0.95f)
         {
             thunder.color = fullColor; // バッテリーが満タンのときの色
+        }
+        else if (currentBattery > maxBattery * 0.1f)
+        {
+            thunder.color = normalColor; // バッテリーが満タンに近いときの色
         }
         else
         {

@@ -1,5 +1,8 @@
+using System;
 using TMPro;
 using UnityEngine;
+using UnityEngine.UI;
+using System.Collections;
 
 public class PlayerUI : MonoBehaviour
 {
@@ -37,6 +40,10 @@ public class PlayerUI : MonoBehaviour
 
         // HP装飾色を設定
         hpUI?.SetUIColor(data.playerColor);
+        OnHPChanged(data.playerIndex, new HPInfo(data.maxHP, data.maxHP, false, data.maxHP));
+
+        // 電池残量初期値を設定
+        StartCoroutine(DelayedBatteryUpdate(data));
 
         // 電球クールダウン初期値を設定
         if (bulbUI != null)
@@ -58,14 +65,10 @@ public class PlayerUI : MonoBehaviour
         switch (state)
         {
             case 0:
-                bulbUI?.SetBulbState(false); // 無灯泡
+                bulbUI?.SetBulbState(false); // 無
                 break;
             case 1:
                 bulbUI?.SetBulbState(true);  // 持っている
-                break;
-            case 2:
-                bulbUI?.SetBulbState(false);
-                bulbUI?.StartCooldown();     // CD中（内部CD時間に従う）
                 break;
         }
     }
@@ -74,6 +77,11 @@ public class PlayerUI : MonoBehaviour
     {
         if (index != playerIndex) return;
         batteryUI?.UpdateBattery(num,isCharge); // BatteryUI内部でアニメ処理を維持
+    }
+    private IEnumerator DelayedBatteryUpdate(PlayerData data)
+    {
+        yield return null;
+        OnBatteryChanged(data.playerIndex, data.battery, false);
     }
 
 }

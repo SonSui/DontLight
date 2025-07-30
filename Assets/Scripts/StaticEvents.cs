@@ -7,6 +7,7 @@ public class StaticEvents : MonoBehaviour
     public static string playerStat;
     public static string hostIP;
     public static string clientIP;
+    public static bool Dissolution;
 
     public static string GetLocalIPAddress()
     {

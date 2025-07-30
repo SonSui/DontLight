@@ -26,8 +26,8 @@ public class SceneTransitionManager : MonoBehaviour
         if (fadeImage != null)
         {
             fadeImage.gameObject.SetActive(true);
-            fadeImage.color = new Color(0, 0, 0, 1); // ≥ı º∫⁄∆¡
-            StartCoroutine(Fade(0)); // µ≠»ÅE
+            fadeImage.color = new Color(0, 0, 0, 1);
+            StartCoroutine(Fade(0));
         }
     }
 
@@ -38,9 +38,9 @@ public class SceneTransitionManager : MonoBehaviour
 
     IEnumerator Transition(string sceneName)
     {
-        yield return StartCoroutine(Fade(1)); // µ≠≥ÅE
+        yield return StartCoroutine(Fade(1));
         yield return SceneManager.LoadSceneAsync(sceneName);
-        yield return StartCoroutine(Fade(0)); // µ≠»ÅE
+        yield return StartCoroutine(Fade(0));
     }
 
     IEnumerator Fade(float targetAlpha)
@@ -63,6 +63,6 @@ public class SceneTransitionManager : MonoBehaviour
         fadeImage.color = new Color(0, 0, 0, targetAlpha);
 
         if (targetAlpha == 0)
-            fadeImage.gameObject.SetActive(false);
+            fadeImage.raycastTarget = false;
     }
 }

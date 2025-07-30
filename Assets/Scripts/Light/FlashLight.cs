@@ -6,7 +6,7 @@ public class Flashlight : MonoBehaviour
     
     public float damagePerSecond = 1f;         // 毎秒ダメージ量
     public float rangeOffset = 0.9f;          // LightのrangeとspotAngleに掛けるオフセット値
-    public bool isEnabled = true;              // 懐中電灯の有効/無効
+    public bool isEnabled = false;              // 懐中電灯の有効/無効
     public GameObject owner;                   // 懐中電灯の所有者（プレイヤー）
     public bool isDebug = false;               // デバッグ用のフラグ
     public Light flashlightLight;              // 懐中電灯のLightコンポーネント
@@ -30,6 +30,10 @@ public class Flashlight : MonoBehaviour
             range = flashlightLight.range * rangeOffset;
             spotAngle = flashlightLight.spotAngle * rangeOffset;
             intensity = flashlightLight.intensity; // 初期の光の強さを取得
+            if (intensity <= 0f)
+            {
+                intensity = 10f; // 光の強さが0以下ならデフォルト値を設定
+            }
 
             if (isDebug) Debug.Log($"[FLASHLIGHT] {name} loaded settings from Light component. range={range}, spotAngle={spotAngle}");
             
@@ -41,6 +45,9 @@ public class Flashlight : MonoBehaviour
             spotAngle = 25f * rangeOffset;
             if (isDebug) Debug.LogWarning($"[FLASHLIGHT] {name} Light component not found. Using default range and spotAngle.");
         }
+
+        // 懐中電灯の初期状態を設定
+        flashlightLight.enabled = isEnabled; // 懐中電灯の有効/無効を設定
     }
     private void OnDestroy()
     {
@@ -68,7 +75,7 @@ public class Flashlight : MonoBehaviour
 
         Vector3 dirNormalized = dirToPlayer.normalized;              // 単位ベクトルを取得
 
-        // 手電筒のForward方向とプレイヤー方向との内積を計算
+        // Forward方向とプレイヤー方向との内積を計算
         float dot = Vector3.Dot(lightForward, dirNormalized);
 
         // スポット角度の半分をラジアンに変換
@@ -113,25 +120,26 @@ public class Flashlight : MonoBehaviour
     public void ToggleFlashlight(bool toggle)
     {
         // 通常のON/OFF切替、強制消灯中なら中止
-        if (isShuttingDown&&toggle)
+        if (isShuttingDown && toggle)
         {
             CancelShutdown();
         }
-        else
+
+        isEnabled = toggle;
+        if (flashlightLight != null)
         {
-            isEnabled = toggle;
-            if (flashlightLight != null)
-            {
-                flashlightLight.enabled = isEnabled;
-            }
-            if (isDebug) Debug.Log($"[FLASHLIGHT] {name} flashlight is now {(isEnabled ? "enabled" : "disabled")}.");
+            flashlightLight.enabled = isEnabled;
+            flashlightLight.intensity = isEnabled ? intensity : 0f; // ONなら光の強さを設定、OFFなら0にする
         }
+        if (isDebug) Debug.Log($"[FLASHLIGHT] {name} flashlight is now {(isEnabled ? "enabled" : "disabled")}.");
+        GetComponent<AudioSource>()?.Play(); // ON/OFF時に音を鳴らす（AudioSourceがあれば）
     }
     /// <summary>
     /// 強制的に懐中電灯を1.5秒かけて消灯（バッテリー切れ時など）
     /// </summary>
     public void ForceShutdown()
     {
+        if (!isEnabled) return;
         if (isShuttingDown || flashlightLight == null) return;
 
         isShuttingDown = true;
@@ -157,6 +165,7 @@ public class Flashlight : MonoBehaviour
         seq.OnComplete(() =>
         {
             flashlightLight.enabled = false;
+            isEnabled = false; // 懐中電灯を無効化
             shutdownTween = null;
             isShuttingDown = false;
             if (isDebug) Debug.Log($"[FLASHLIGHT] {name} forced shutdown complete.");

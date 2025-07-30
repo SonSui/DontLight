@@ -26,6 +26,10 @@ public class LightManager : MonoBehaviour
         GameEvents.Light.OnFlashlightDestroyed -= RemoveFlashlight;
     }
 
+    private void Start()
+    {
+        bulbMaxCount = GameManager.Instance?.GetMaxBulbCount() ?? bulbMaxCount; // GameManager‚©‚çÅ‘å“d‹…”‚ğæ“¾
+    }
     private void AddLight(Bulb light)
     {
         if (!bulbs.Contains(light))

@@ -2,63 +2,94 @@ using System;
 using System.Collections.Generic;
 //using UnityEditor.PackageManager;
 using UnityEngine;
+using UnityEngine.InputSystem;
 
 public struct DamageInfo
 {
-    public GameObject attacker; // UŒ‚Ò‚ÌGameObject
-    public float damage;        // ó‚¯‚½ƒ_ƒ[ƒW—Ê
-    public Vector3 hitPoint;    // ƒ_ƒ[ƒW‚ğó‚¯‚½ˆÊ’u
+    public GameObject attacker; // æ”»æ’ƒè€…ã®GameObject
+    public float damage;        // å—ã‘ãŸãƒ€ãƒ¡ãƒ¼ã‚¸é‡
+    public Vector3 hitPoint;    // ãƒ€ãƒ¡ãƒ¼ã‚¸ã‚’å—ã‘ãŸä½ç½®
 }
+
 [System.Serializable]
 public class PlayerData
 {
-    /// <summary>ƒvƒŒƒCƒ„[”Ô†i0`3j</summary>
-    public int playerIndex;
+    /// <summary>ãƒ—ãƒ¬ã‚¤ãƒ¤ãƒ¼ç•ªå·ï¼ˆ0ï½3ï¼‰</summary>
+    public int playerIndex = -1;
 
-    /// <summary>ƒvƒŒƒCƒ„[–¼i”CˆÓj</summary>
+    /// <summary>ãƒ—ãƒ¬ã‚¤ãƒ¤ãƒ¼åï¼ˆä»»æ„ï¼‰</summary>
     public string playerName;
 
-    /// <summary>ƒvƒŒƒCƒ„[‚ÌFiHPUI‘•ü‚È‚Ç‚Ég—pj</summary>
+    /// <summary>ãƒ—ãƒ¬ã‚¤ãƒ¤ãƒ¼ã®è‰²ï¼ˆHPUIè£…é£¾ãªã©ã«ä½¿ç”¨ï¼‰</summary>
     public Color playerColor;
 
-    /// <summary>“”–A‚ÌƒN[ƒ‹ƒ_ƒEƒ“‰Šú’l</summary>
-    public float bulbCooldown;
+    /// <summary>ç¯æ³¡ã®ã‚¯ãƒ¼ãƒ«ãƒ€ã‚¦ãƒ³åˆæœŸå€¤</summary>
+    public float bulbCooldown = 5f;
 
-    /// <summary>‰ŠúHPiÅ‘å’l‚Æ‚µ‚Ä‚àg—pj</summary>
-    public float maxHP;
+    /// <summary>åˆæœŸHPï¼ˆæœ€å¤§å€¤ã¨ã—ã¦ã‚‚ä½¿ç”¨ï¼‰</summary>
+    public float maxHP = 100f;
 
-    /// <summary>‰Šú“d’rc—Ê</summary>
-    public float battery;
+    /// <summary>åˆæœŸé›»æ± æ®‹é‡</summary>
+    public float battery = 10f;
+
+    public PlayerInput input;
+    public string controlScheme;
+    public List<InputDevice> devices = new List<InputDevice>();
 }
 
 public class GameEvents
 {
     public static class PlayerEvents
     {
-        public static Action<GameObject> OnPlayerSpawned; //ƒvƒŒƒCƒ„[‚ªƒXƒ|[ƒ“‚µ‚½‚Æ‚«‚ÉŒÄ‚Î‚ê‚éƒCƒxƒ“ƒg
-        public static Action<GameObject> OnPlayerDied;//ƒvƒŒƒCƒ„[‚ª€–S‚µ‚½‚Æ‚«‚ÉŒÄ‚Î‚ê‚éƒCƒxƒ“ƒg
-        public static Func<Dictionary<GameObject, PlayerData>> OnQueryAllPlayers;//‘S‚Ä‚ÌƒvƒŒƒCƒ„[‚ğæ“¾‚·‚é‚½‚ß‚ÌƒCƒxƒ“ƒg
-        public static Action<GameObject, DamageInfo> OnTakeLightDamage;//ƒvƒŒƒCƒ„[‚ªƒ‰ƒCƒg‚©‚çƒ_ƒ[ƒW‚ğó‚¯‚½‚Æ‚«‚ÉŒÄ‚Î‚ê‚éƒCƒxƒ“ƒg
+        public static Action<InputOnlyPlayer> OnPlayerRegistered; //ãƒ—ãƒ¬ã‚¤ãƒ¤ãƒ¼ãŒç™»éŒ²ã•ã‚ŒãŸã¨ãã«å‘¼ã°ã‚Œã‚‹ã‚¤ãƒ™ãƒ³ãƒˆ
+        public static Action<GameObject> OnPlayerSpawned; //ãƒ—ãƒ¬ã‚¤ãƒ¤ãƒ¼ãŒã‚¹ãƒãƒ¼ãƒ³ã—ãŸã¨ãã«å‘¼ã°ã‚Œã‚‹ã‚¤ãƒ™ãƒ³ãƒˆ
+        public static Action<GameObject> OnPlayerDied;//ãƒ—ãƒ¬ã‚¤ãƒ¤ãƒ¼ãŒæ­»äº¡ã—ãŸã¨ãã«å‘¼ã°ã‚Œã‚‹ã‚¤ãƒ™ãƒ³ãƒˆ
+        public static Func<Dictionary<GameObject, PlayerData>> OnQueryAllPlayers;//å…¨ã¦ã®ãƒ—ãƒ¬ã‚¤ãƒ¤ãƒ¼ã‚’å–å¾—ã™ã‚‹ãŸã‚ã®ã‚¤ãƒ™ãƒ³ãƒˆ
+        public static Action<GameObject, DamageInfo> OnTakeLightDamage;//ãƒ—ãƒ¬ã‚¤ãƒ¤ãƒ¼ãŒãƒ©ã‚¤ãƒˆã‹ã‚‰ãƒ€ãƒ¡ãƒ¼ã‚¸ã‚’å—ã‘ãŸã¨ãã«å‘¼ã°ã‚Œã‚‹ã‚¤ãƒ™ãƒ³ãƒˆ
         /// <summary>
-        /// ƒvƒŒƒCƒ„[‚ª“o˜^‚³‚ê‚½AŒÂ•Ê‚ÉUI‚ğ¶¬
+        /// ãƒ—ãƒ¬ã‚¤ãƒ¤ãƒ¼ãŒç™»éŒ²ã•ã‚ŒãŸæ™‚ã€å€‹åˆ¥ã«UIã‚’ç”Ÿæˆ
         /// </summary>
         public static Action<PlayerData> OnPlayerUIAdd;
 
-        // HP•Ï‰»
+        // HPå¤‰åŒ–
         public static Action<int, HPInfo> OnHPChanged;
 
-        // “d’r•Ï‰»
+        // é›»æ± å¤‰åŒ–
         public static Action<int, float,bool> OnBatteryChanged;
 
-        // “”–Aó‘Ô•Ï‰»i0 = –³, 1 = ‚Á‚Ä‚é, 2 = CD’†j
+        // é›»çƒçŠ¶æ…‹å¤‰åŒ–<ãƒ—ãƒ¬ãƒ¼ãƒ¤ãƒ¼ç•ªå·,é›»çƒçŠ¶æ…‹>ï¼ˆ0 = ç„¡, 1 = æŒã£ã¦ã‚‹ï¼‰
         public static Action<int, int> OnBulbStateChanged;
+
+        public static Action<PlayerData> OnWinnerSet; // å‹è€…ãŒæ±ºå®šã—ãŸã¨ãã«å‘¼ã°ã‚Œã‚‹ã‚¤ãƒ™ãƒ³ãƒˆ
     }
     public static class Light
     {
-        public static Action<Bulb> OnPointLightCreated;//“d‹…‚ªì¬‚³‚ê‚½‚Æ‚«‚ÉŒÄ‚Î‚ê‚éƒCƒxƒ“ƒg
-        public static Action<Bulb> OnPointLightDestroyed;//“d‹…‚ª”j‰ó‚³‚ê‚½‚Æ‚«‚ÉŒÄ‚Î‚ê‚éƒCƒxƒ“ƒg
-        public static Action<Flashlight> OnFlashlightCreated; // ‰ù’†“d“”‚ªì¬‚³‚ê‚½‚Æ‚«‚ÉŒÄ‚Î‚ê‚éƒCƒxƒ“ƒg
-        public static Action<Flashlight> OnFlashlightDestroyed; // ‰ù’†“d“”‚ª”j‰ó‚³‚ê‚½‚Æ‚«‚ÉŒÄ‚Î‚ê‚éƒCƒxƒ“ƒg
+        public static Action<Bulb> OnPointLightCreated;//é›»çƒãŒä½œæˆã•ã‚ŒãŸã¨ãã«å‘¼ã°ã‚Œã‚‹ã‚¤ãƒ™ãƒ³ãƒˆ
+        public static Action<Bulb> OnPointLightDestroyed;//é›»çƒãŒç ´å£Šã•ã‚ŒãŸã¨ãã«å‘¼ã°ã‚Œã‚‹ã‚¤ãƒ™ãƒ³ãƒˆ
+        public static Action<Flashlight> OnFlashlightCreated; // æ‡ä¸­é›»ç¯ãŒä½œæˆã•ã‚ŒãŸã¨ãã«å‘¼ã°ã‚Œã‚‹ã‚¤ãƒ™ãƒ³ãƒˆ
+        public static Action<Flashlight> OnFlashlightDestroyed; // æ‡ä¸­é›»ç¯ãŒç ´å£Šã•ã‚ŒãŸã¨ãã«å‘¼ã°ã‚Œã‚‹ã‚¤ãƒ™ãƒ³ãƒˆ
     }
+    public static class UIEvents
+    {
+        public static Action OnLocalStart;
+        public static Action OnOnlineStart;
+        public static Action OnGameClose;
+        public static Action OnReturnToTitleScene;
+        public static Action OnLocalGameStart;
+        public static Action OnOnlineGameStart;
 
+        public static Action OnOnlineRoomEnter;
+
+        public static Action<GameState> OnGameStateChange;
+
+    }
+    public static class PrepareUIEvents
+    {
+        public static Action<PlayerData> OnPlayerDataCreated;
+        public static Action<int> OnSetBulbCount;
+    }
+    public static class GameSceneEvents
+    {
+        public static Action<GameState> OnBeforeSceneChange;
+    }
 }
