@@ -13,8 +13,7 @@ PlayerSettings:
   useOnDemandResources: 0
   accelerometerFrequency: 60
   companyName: 2D
-  productName: "2025\u5E74\u5EA6 \u5236\u4F5C\u5B9F\u7FD2 \u30C1\u30FC\u30E0\u5236\u4F5C
-    \u300C2-D\u300D"
+  productName: DontLight
   defaultCursor: {fileID: 0}
   cursorHotspot: {x: 0, y: 0}
   m_SplashScreenBackgroundColor: {r: 0.13725491, g: 0.12156863, b: 0.1254902, a: 1}
