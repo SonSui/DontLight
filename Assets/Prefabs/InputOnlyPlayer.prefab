@@ -156,7 +156,7 @@ MonoBehaviour:
     playerName: 
     playerColor: {r: 0, g: 0, b: 0, a: 0}
     bulbCooldown: 5
-    maxHP: 80
+    maxHP: 50
     battery: 10
     input: {fileID: 0}
     controlScheme: 
