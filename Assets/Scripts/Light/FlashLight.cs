@@ -50,7 +50,7 @@ public class Flashlight : MonoBehaviour
         // ‰ù’†“d“”‚Ì‰Šúó‘Ô‚ğİ’è
         flashlightLight.enabled = isEnabled; // ‰ù’†“d“”‚Ì—LŒø/–³Œø‚ğİ’è
 
-        if(owner!=null)playerParameter = GetComponent<PlayerTestSon>();
+        if(owner!=null)playerParameter = owner.GetComponent<PlayerTestSon>();
     }
     private void OnDestroy()
     {
