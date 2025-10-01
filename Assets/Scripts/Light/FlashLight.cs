@@ -7,7 +7,8 @@ public class Flashlight : MonoBehaviour
     public float damagePerSecond = 1f;         // 毎秒ダメージ量
     public float rangeOffset = 0.9f;          // LightのrangeとspotAngleに掛けるオフセット値
     public bool isEnabled = false;              // 懐中電灯の有効/無効
-    public GameObject owner;                   // 懐中電灯の所有者（プレイヤー）
+    public GameObject owner;                   // 懐中電灯の所有者（プレイヤー)
+    private PlayerTestSon playerParameter;       // 所有者のPlayerTestSonコンポーネント参照
     public bool isDebug = false;               // デバッグ用のフラグ
     public Light flashlightLight;              // 懐中電灯のLightコンポーネント
     public float intensity = 10f;            // 懐中電灯の光の強さ（初期値）
@@ -48,6 +49,8 @@ public class Flashlight : MonoBehaviour
 
         // 懐中電灯の初期状態を設定
         flashlightLight.enabled = isEnabled; // 懐中電灯の有効/無効を設定
+
+        if(owner!=null)playerParameter = GetComponent<PlayerTestSon>();
     }
     private void OnDestroy()
     {
@@ -62,6 +65,7 @@ public class Flashlight : MonoBehaviour
     {
         if (!isEnabled || isShuttingDown) return; // 消灯中なら無視 // 懐中電灯が無効なら何もしない
         if (player == null || player == owner) return; // 所有者自身は無視
+        if (playerParameter != null && playerParameter.CurrentBattery <= 0f) return; // 電池切れなら無視
 
         Vector3 lightPos = transform.position;                       // 懐中電灯の位置
         Vector3 lightForward = transform.forward;                    // 懐中電灯の向き（Forwardベクトル）

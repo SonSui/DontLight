@@ -82,6 +82,7 @@ public class GameEvents
 
         public static Action<GameState> OnGameStateChange;
 
+        public static Action OnOpenTutorial;
     }
     public static class PrepareUIEvents
     {

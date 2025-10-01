@@ -44,7 +44,7 @@ public class HPUI : MonoBehaviour
     private float currentHP = 20f; // 現在のHP
 
     private bool isDamaged = false; // ダメージを受けたかどうかのフラグ
-    private float damageDuration = 0.2f; // ダメージを受けたときのアニメーションの持続時間
+    private float damageDuration = 0.8f; // ダメージを受けたときのアニメーションの持続時間
     private Tween damageResetTween; // ダメージを受けたときの装飾のリセット用Tween
     private Tween shakeTween; // HPバーの揺れアニメーション用のTween
     private float shakeRadius = 5f; // HPバーの揺れの半径

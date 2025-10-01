@@ -1,21 +1,29 @@
 using UnityEngine;
 using DG.Tweening;
+using System.Collections.Generic;
 
 public class PlayerTestSon : MonoBehaviour
 {
     [Header("プレイヤーの基本設定")]
 
     [Header("体力設定")]
-    private float currentHP =100f;
+    private float currentHP = 100f;
     private float originMaxHP = 100f; // 初期最大HP
     public float maxHP = 100f;
     public float HPRecoverCooldown = 1f; // HP回復のクールダウン時間
+    public int playerDisplayHP = 6;
+    private float HPSlotAmount = 10f;
+    private List<bool> HpDcreaseEff = new List<bool>();
     private float lastDamageTime = 0f; // 最後にダメージを受けた時間
     public float HPRecoverAmount = 1f; // HP回復量
     public GameObject damageEffect; // ダメージエフェクトの参照
     public float damageEffectDuration = 0.5f; // ダメージエフェクトの持続時間
     private float damageEffectTimer = 0f; // ダメージエフェクトのタイマー
     public GameObject healEffect; // 回復エフェクトの参照
+
+    public GameObject damageEffectExplo;
+    public float damageEffectExploDuration = 0.6f;
+    private float damageEffectExploTimer = 0f;
 
     [Header("電池設定")]
     private float chargeDamping = 1f; // 充電の減少量
@@ -25,6 +33,8 @@ public class PlayerTestSon : MonoBehaviour
     private float currentBattery = 10f; // 初期電池残量
     public Flashlight flashlight; // フラッシュライトの参照
     public bool isFlashlightOn = false; // フラッシュライトの状態
+    public GameObject batteryFlashEffect; // 電池残量が少ないときのエフェクト
+    public float CurrentBattery => currentBattery;
 
     [Header("電球設定")]
     private float bulbCooldown = 5f; // 初期電球クールダウン時間
@@ -35,7 +45,7 @@ public class PlayerTestSon : MonoBehaviour
     public Material playerMaterial;
     private Material usingMaterial;
     public Renderer playerRenderer;
-    
+
 
     [Header("アニメーション設定")]
     public float deathDelay = 0.3f; // 死亡アニメーションの遅延時間
@@ -50,6 +60,11 @@ public class PlayerTestSon : MonoBehaviour
     public bool isWinner = false; // 勝利フラグ
     public bool isDying = false; // 死亡中フラグ
 
+    private Sequence colorSequence;
+    private Color originalColor = Color.white;
+    [Header("ダメージ色演出")]
+    public float flashOneWayDuration = 0.15f;
+    public Ease flashEase = Ease.InOutSine;
 
     public void SetIndex(int index)
     {
@@ -71,11 +86,18 @@ public class PlayerTestSon : MonoBehaviour
             Debug.LogWarning("PlayerRenderer or Material is not set.");
         }
 
+        originalColor = playerData.playerColor;
         maxHP = playerData.maxHP;
         currentHP = maxHP; // 初期HPを最大HPに設定
         originMaxHP = playerData.maxHP; // 初期最大HPを保存
         currentBattery = playerData.battery; // 初期電池残量を設定
         bulbCooldown = 0f; // 初期電球クールダウン時間を設定
+        HPSlotAmount = maxHP / playerDisplayHP; // 1スロットあたりのHPを計算
+        HpDcreaseEff.Clear();
+        for (int i = 0; i < playerDisplayHP; i++)
+        {
+            HpDcreaseEff.Add(false); // 初期化
+        }
     }
     private void Start()
     {
@@ -86,10 +108,12 @@ public class PlayerTestSon : MonoBehaviour
         }
         damageEffect.SetActive(false); // 初期状態ではダメージエフェクトを非表示にする
         healEffect.SetActive(false); // 初期状態では回復エフェクトを非表示にする
+
+        SetPlayerData(playerData); // プレイヤーデータを設定
     }
     private void Update()
     {
-        if(isWinner) return; // 勝利者は更新処理を行わない
+        if (isWinner) return; // 勝利者は更新処理を行わない
         if (lastDamageTime > HPRecoverCooldown && !isDying)
         {
             if (currentHP < maxHP)
@@ -100,18 +124,30 @@ public class PlayerTestSon : MonoBehaviour
                 }
                 float newHP = currentHP + HPRecoverAmount * Time.deltaTime;
                 currentHP = Mathf.Min(newHP, maxHP); // 最大HPを超えないようにする
-                GameEvents.PlayerEvents.OnHPChanged?.Invoke(playerData.playerIndex, new HPInfo(currentHP, maxHP, false)); // HP更新イベントを送信
+
+                for (int i = 0; i < playerDisplayHP; i++)
+                {
+                    if (currentHP >= HPSlotAmount * (i + 1) && HpDcreaseEff[i])
+                    {
+                        HpDcreaseEff[i] = false;
+                        Debug.Log($"[Player{playerData.playerIndex}] HP recovered to {currentHP}. Slot {i} restored.");
+                        GameEvents.PlayerEvents.OnHPChanged?.Invoke(playerData.playerIndex, new HPInfo(currentHP, maxHP, false));
+                        if(i >= playerDisplayHP/3) ResetMaterialColor();
+                    }
+                }
+                
             }
             else if (healEffect != null && healEffect.activeSelf)
             {
                 healEffect.SetActive(false); // 回復エフェクトを非表示
+                GameEvents.PlayerEvents.OnHPChanged?.Invoke(playerData.playerIndex, new HPInfo(currentHP, maxHP, false));
             }
         }
         else
         {
             lastDamageTime += Time.deltaTime; // クールダウン時間を更新
         }
-        if(damageEffectTimer > 0f)
+        if (damageEffectTimer > 0f)
         {
             damageEffectTimer -= Time.deltaTime; // ダメージエフェクトのタイマーを更新
             if (damageEffectTimer <= 0f)
@@ -123,40 +159,54 @@ public class PlayerTestSon : MonoBehaviour
                 }
             }
         }
-        if(chargeDamping > 1f)
+
+        if (damageEffectExploTimer > 0f)
+        {
+            damageEffectExploTimer -= Time.deltaTime; // ダメージエフェクトのタイマーを更新
+            if (damageEffectExploTimer <= 0f)
+            {
+                // ダメージエフェクトのタイマーが0になったらエフェクトを非表示にする
+                if (damageEffectExplo != null)
+                {
+                    damageEffectExplo.SetActive(false);
+                }
+            }
+        }
+        if (chargeDamping > 1f)
         {
             chargeDamping -= Time.deltaTime * chargeDampingRecoverAmount; // 充電の減少量を回復
             chargeDamping = Mathf.Max(1f, chargeDamping); // 1f未満にならないようにする
         }
-        if(bulbCooldown > 0)
+        if (bulbCooldown > 0)
         {
             bulbCooldown -= Time.deltaTime; // 電球クールダウン時間を更新
             bulbCooldown = Mathf.Max(0, bulbCooldown); // 負の値にならないようにする
-            if(bulbCooldown <= 0f)
+            if (bulbCooldown <= 0f)
             {
                 // 電球クールダウンが終了したらイベントを送信
                 GameEvents.PlayerEvents.OnBulbStateChanged?.Invoke(playerData.playerIndex, 1); // 1 = 電球使用可能
-                
+
             }
         }
-        if(isFlashlightOn && flashlight != null)
+        if (isFlashlightOn && flashlight != null)
         {
             // フラッシュライトがオンの場合、電池残量を減少させる
             currentBattery -= Time.deltaTime; // 電池残量を減少
             currentBattery = Mathf.Max(0, currentBattery); // 負の値にならないようにする
             GameEvents.PlayerEvents.OnBatteryChanged?.Invoke(playerData.playerIndex, currentBattery, false); // 電池更新イベントを送信
-            if(currentBattery <= 0f)
+            if (currentBattery <= 0f)
             {
                 // 電池がなくなった場合、フラッシュライトをオフにする
                 flashlight.ForceShutdown();
                 isFlashlightOn = false;
+                batteryFlashEffect.SetActive(true); // 電池残量が少ないエフェクトを表示
             }
         }
     }
 
     public void Die()
     {
-        if (isWinner||isDying) return; // 勝利者または既に死亡中のプレイヤーは死亡処理を行わない
+        if (isWinner || isDying) return; // 勝利者または既に死亡中のプレイヤーは死亡処理を行わない
         if (IsPlaying)
         {
             Debug.Log("Already Dying, skipping.");
@@ -191,6 +241,8 @@ public class PlayerTestSon : MonoBehaviour
         {
             currentSequence.Kill();
         }
+        if (colorSequence != null && colorSequence.IsActive())
+            colorSequence.Kill();
     }
     /// <summary>
     /// 光源などによるダメージを受ける
@@ -200,7 +252,7 @@ public class PlayerTestSon : MonoBehaviour
         if (isWinner || isDying) return; // 勝利者または死亡中のプレイヤーはダメージを受けない
         currentHP -= damageInfo.damage;
         currentHP = Mathf.Max(0, currentHP);
-        maxHP = Mathf.Min((originMaxHP-currentHP)/2 + currentHP,maxHP); // 現在のHPに応じて最大HPを調整
+        maxHP = Mathf.Min((originMaxHP - currentHP) / 2 + currentHP, maxHP); // 現在のHPに応じて最大HPを調整
 
         lastDamageTime = 0f; // ダメージを受けたのでクールダウンをリセット
         damageEffectTimer = damageEffectDuration; // ダメージエフェクトのタイマーをリセット
@@ -208,13 +260,24 @@ public class PlayerTestSon : MonoBehaviour
         {
             damageEffect.SetActive(true); // ダメージエフェクトを表示
         }
-        if(healEffect != null)
+        if (healEffect != null)
         {
             healEffect.SetActive(false); // 回復エフェクトを非表示
         }
 
         // UI更新イベントを送信
-        GameEvents.PlayerEvents.OnHPChanged?.Invoke(playerData.playerIndex, new HPInfo(currentHP, maxHP, true));
+        for (int i = 0; i < playerDisplayHP; i++)
+        {
+            float slotThreshold = HPSlotAmount * (i + 1);
+            if (currentHP < slotThreshold && !HpDcreaseEff[i])
+            {
+                HpDcreaseEff[i] = true;
+                GameEvents.PlayerEvents.OnHPChanged?.Invoke(playerData.playerIndex, new HPInfo(currentHP, maxHP, true));
+                if(i>playerDisplayHP/3)SetMaterialRedForSec(0.5f);
+                else SetMaterialRedForSec(-1);
+            }
+        }
+
 
         // デバッグログ
         Debug.Log($"[Player{playerData.playerIndex}] took {damageInfo.damage} damage. HP: {currentHP}");
@@ -238,7 +301,7 @@ public class PlayerTestSon : MonoBehaviour
     {
         if (isDying) return false; // 死亡中のプレイヤーは充電できない
         if (currentBattery >= playerData.battery) return false; // 電池が満タンなら何もしない
-        currentBattery += (amount/chargeDamping);
+        currentBattery += (amount / chargeDamping);
         chargeDamping += chargeDampingAmount; // 充電の減少量を増加
         chargeDamping = Mathf.Min(chargeDamping, chargeDampingMax); // 最大充電減少量を超えないようにする
         currentBattery = Mathf.Min(currentBattery, playerData.battery); // 最大電池残量を超えないようにする
@@ -252,7 +315,7 @@ public class PlayerTestSon : MonoBehaviour
         if (bulbCooldown > 0) return false; // 電球がクールダウン中なら投げられない
         bulbCooldown = playerData.bulbCooldown; // クールダウン時間をリセット
         GameEvents.PlayerEvents.OnBulbStateChanged?.Invoke(playerData.playerIndex, 0); // 0 = 電球ない
-        
+
         animatorMesh.SetTrigger("Attack"); // 電球を投げるアニメーションを再生
         return true; // 電球を投げることができた
     }
@@ -267,5 +330,55 @@ public class PlayerTestSon : MonoBehaviour
         GameEvents.PlayerEvents.OnWinnerSet?.Invoke(playerData);
     }
 
+    private void SetMaterialRedForSec(float t)
+    {
+        if (usingMaterial == null) return;
+
+        if (colorSequence != null && colorSequence.IsActive())
+            colorSequence.Kill();
+
+        if(damageEffectExplo != null)
+        {
+            damageEffectExplo.SetActive(true);
+            damageEffectExploTimer = damageEffectExploDuration; // ダメージエフェクトのタイマーをリセット
+        }
+
+        Color hurtRed = Color.red;
+
+        if (t > 0f)
+        {
+            float oneWay = Mathf.Max(0.01f, t * 0.5f);
+            colorSequence = DOTween.Sequence();
+            colorSequence
+                .Join(usingMaterial.DOColor(hurtRed, "_MainColor", oneWay).SetEase(flashEase))
+                .Join(usingMaterial.DOColor(hurtRed, "_DissolveColor", oneWay).SetEase(flashEase))
+                .AppendInterval(0f)
+                .Append(usingMaterial.DOColor(originalColor, "_MainColor", oneWay).SetEase(flashEase))
+                .Join(usingMaterial.DOColor(originalColor, "_DissolveColor", oneWay).SetEase(flashEase))
+                .OnComplete(() => colorSequence = null);
+        }
+        else
+        {
+
+            usingMaterial.SetColor("_MainColor", playerData.playerColor);
+            usingMaterial.SetColor("_DissolveColor", playerData.playerColor);
+            colorSequence = DOTween.Sequence();
+            colorSequence
+                .Join(usingMaterial.DOColor(hurtRed, "_MainColor", flashOneWayDuration).SetEase(flashEase))
+                .Join(usingMaterial.DOColor(hurtRed, "_DissolveColor", flashOneWayDuration).SetEase(flashEase))
+                .SetLoops(-1, LoopType.Yoyo);
+        }
+    }
+    private void ResetMaterialColor()
+    {
+        if (usingMaterial == null) return;
+
+        if (colorSequence != null && colorSequence.IsActive())
+            colorSequence.Kill();
+
+        float back = Mathf.Max(0.05f, flashOneWayDuration * 0.75f);
+        usingMaterial.DOColor(originalColor, "_MainColor", back).SetEase(flashEase);
+        usingMaterial.DOColor(originalColor, "_DissolveColor", back).SetEase(flashEase);
+    }
 }
 
