@@ -35,6 +35,8 @@ public class PlayerTestSon : MonoBehaviour
     public bool isFlashlightOn = false; // フラッシュライトの状態
     public GameObject batteryFlashEffect; // 電池残量が少ないときのエフェクト
     public float CurrentBattery => currentBattery;
+    [SerializeField]private BatteryWorldBar_CenterPivot batteryWordUI;
+
 
     [Header("電球設定")]
     private float bulbCooldown = 5f; // 初期電球クールダウン時間
@@ -194,6 +196,7 @@ public class PlayerTestSon : MonoBehaviour
             currentBattery -= Time.deltaTime; // 電池残量を減少
             currentBattery = Mathf.Max(0, currentBattery); // 負の値にならないようにする
             GameEvents.PlayerEvents.OnBatteryChanged?.Invoke(playerData.playerIndex, currentBattery, false); // 電池更新イベントを送信
+            batteryWordUI?.UpdateBatteryImmediately(currentBattery); // 世界UI更新
             if (currentBattery <= 0f)
             {
                 // 電池がなくなった場合、フラッシュライトをオフにする
@@ -306,6 +309,7 @@ public class PlayerTestSon : MonoBehaviour
         chargeDamping = Mathf.Min(chargeDamping, chargeDampingMax); // 最大充電減少量を超えないようにする
         currentBattery = Mathf.Min(currentBattery, playerData.battery); // 最大電池残量を超えないようにする
         GameEvents.PlayerEvents.OnBatteryChanged?.Invoke(playerData.playerIndex, currentBattery, true); // 電池更新イベントを送信
+        batteryWordUI?.UpdateBattery(currentBattery, true, playerData.battery); // 世界UI更新
         return true; // 充電に成功した場合はtrueを返す
     }
 
