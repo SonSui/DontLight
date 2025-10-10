@@ -84,6 +84,7 @@ public class BatteryWorldBar_CenterPivot : MonoBehaviour
 
         // ‰Šú”½‰f
         ApplyBattery(currentBattery, false, maxBattery, instant: true);
+        gameObject.SetActive(false);
     }
 
     private void OnDestroy()

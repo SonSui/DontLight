@@ -1,6 +1,8 @@
 using UnityEngine;
 using DG.Tweening;
 using System.Collections.Generic;
+using UnityEngine.InputSystem;
+using System;
 
 public class PlayerTestSon : MonoBehaviour
 {
@@ -68,6 +70,18 @@ public class PlayerTestSon : MonoBehaviour
     public float flashOneWayDuration = 0.15f;
     public Ease flashEase = Ease.InOutSine;
 
+    private Gamepad gamepad;
+    [Header("被ダメ時の振動")]
+    [SerializeField] private float lightRumbleLow = 0.10f;   // 光源内での弱振動(低周波)
+    [SerializeField] private float lightRumbleHigh = 0.20f;  // 光源内での弱振動(高周波)
+    [SerializeField] private float strongRumbleLow = 0.40f;  // エフェクト演出時の強振動(低周波)
+    [SerializeField] private float strongRumbleHigh = 0.80f; // エフェクト演出時の強振動(高周波)
+    [SerializeField] private float strongRumbleDuration = 0.25f; // 強振動の長さ(秒)
+    [SerializeField] private float rumbleStopDelay = 0.15f;       // 「被弾が来なくなってから」弱振動を止める猶予
+
+    private bool isLightRumbling = false;
+    private float noDamageTimer = 0f;
+
     public void SetIndex(int index)
     {
         playerData.playerIndex = index;
@@ -100,6 +114,7 @@ public class PlayerTestSon : MonoBehaviour
         {
             HpDcreaseEff.Add(false); // 初期化
         }
+        InitGamepadFromPlayerData();
     }
     private void Start()
     {
@@ -112,6 +127,15 @@ public class PlayerTestSon : MonoBehaviour
         healEffect.SetActive(false); // 初期状態では回復エフェクトを非表示にする
 
         SetPlayerData(playerData); // プレイヤーデータを設定
+    }
+    private void OnDisable()
+    {
+        // シーン遷移などで無効化されたときも止めておくと安全
+        if (gamepad != null)
+        {
+            gamepad.SetMotorSpeeds(0f, 0f);
+            gamepad.ResetHaptics();
+        }
     }
     private void Update()
     {
@@ -205,6 +229,11 @@ public class PlayerTestSon : MonoBehaviour
                 batteryFlashEffect.SetActive(true); // 電池残量が少ないエフェクトを表示
             }
         }
+        noDamageTimer += Time.deltaTime;
+        if (isLightRumbling && noDamageTimer > rumbleStopDelay)
+        {
+            StopLightRumble();
+        }
     }
 
     public void Die()
@@ -246,6 +275,12 @@ public class PlayerTestSon : MonoBehaviour
         }
         if (colorSequence != null && colorSequence.IsActive())
             colorSequence.Kill();
+
+        if (gamepad != null)
+        {
+            gamepad.SetMotorSpeeds(0f, 0f);
+            gamepad.ResetHaptics();
+        }
     }
     /// <summary>
     /// 光源などによるダメージを受ける
@@ -256,6 +291,9 @@ public class PlayerTestSon : MonoBehaviour
         currentHP -= damageInfo.damage;
         currentHP = Mathf.Max(0, currentHP);
         maxHP = Mathf.Min((originMaxHP - currentHP) / 2 + currentHP, maxHP); // 現在のHPに応じて最大HPを調整
+
+        if (!isLightRumbling) StartLightRumble();
+        noDamageTimer = 0f;
 
         lastDamageTime = 0f; // ダメージを受けたのでクールダウンをリセット
         damageEffectTimer = damageEffectDuration; // ダメージエフェクトのタイマーをリセット
@@ -278,6 +316,9 @@ public class PlayerTestSon : MonoBehaviour
                 GameEvents.PlayerEvents.OnHPChanged?.Invoke(playerData.playerIndex, new HPInfo(currentHP, maxHP, true));
                 if(i>playerDisplayHP/3)SetMaterialRedForSec(0.5f);
                 else SetMaterialRedForSec(-1);
+
+                if (gamepad != null)
+                    StartCoroutine(StrongRumblePulse(strongRumbleLow, strongRumbleHigh, strongRumbleDuration));
             }
         }
 
@@ -383,6 +424,62 @@ public class PlayerTestSon : MonoBehaviour
         float back = Mathf.Max(0.05f, flashOneWayDuration * 0.75f);
         usingMaterial.DOColor(originalColor, "_MainColor", back).SetEase(flashEase);
         usingMaterial.DOColor(originalColor, "_DissolveColor", back).SetEase(flashEase);
+    }
+    private void InitGamepadFromPlayerData()
+    {
+        // PlayerData.devices 優先
+        if (playerData != null)
+        {
+            if (playerData.devices != null)
+            {
+                foreach (var d in playerData.devices)
+                {
+                    if (d is Gamepad gp) { gamepad = gp; break; }
+                }
+            }
+            // PlayerInput.devices も試す
+            if (gamepad == null && playerData.input != null && playerData.input.devices.Count > 0)
+            {
+                foreach (var d in playerData.input.devices)
+                {
+                    if (d is Gamepad gp)
+                    {
+                        gamepad = gp;
+                        break;
+                    }
+                }
+            }
+        }
+    }
+
+private void StartLightRumble()
+    {
+        if (gamepad == null) return;
+        gamepad.SetMotorSpeeds(lightRumbleLow, lightRumbleHigh);
+        isLightRumbling = true;
+    }
+
+    private void StopLightRumble()
+    {
+        if (gamepad == null) return;
+        gamepad.SetMotorSpeeds(0f, 0f);
+        isLightRumbling = false;
+    }
+
+    /// <summary>強振動を一定時間。終わったら弱振動に自然復帰（必要なら）</summary>
+    private System.Collections.IEnumerator StrongRumblePulse(float low, float high, float duration)
+    {
+        if (gamepad == null) yield break;
+
+        // 今の状態に関わらず強振動へ
+        gamepad.SetMotorSpeeds(low, high);
+        yield return new WaitForSeconds(duration);
+
+        // ダメージ中なら弱振動を継続、そうでなければ停止
+        if (isLightRumbling)
+            gamepad.SetMotorSpeeds(lightRumbleLow, lightRumbleHigh);
+        else
+            gamepad.SetMotorSpeeds(0f, 0f);
     }
 }
 
